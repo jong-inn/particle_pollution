@@ -1,6 +1,7 @@
 class PanZoomMap extends PanZoomPage {
   
   public PanZoomMap() {
+    // the max/min value in "pm_loc.csv" file
     minLatitude = 32.57816;
     maxLatitude = 41.75613;
     minLongitude = -124.20347;
