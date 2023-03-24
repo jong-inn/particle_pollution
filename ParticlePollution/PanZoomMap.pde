@@ -1,7 +1,7 @@
 /* CSci-5609 Support Code created by Prof. Dan Keefe, Fall 2023
 
 This class extends the PanZoomPage base class.  Please read the comments at the top of
-that file before continuing...
+that file before continuing..
 
 The PanZoomMap class provides a special wrapper around a PanZoomPage.  It automatically fits
 a rectangular region defined in earth coordinates, i.e., (latitude, longitude), into the
