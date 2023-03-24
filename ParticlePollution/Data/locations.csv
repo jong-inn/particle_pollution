@@ -1,0 +1,123 @@
+﻿County Code,Site Num,Latitude,Longitude,Local Site Name,State Name,County Name,City Name
+1,7,37.687526,-121.784217,Livermore,California,Alameda,Livermore
+1,9,37.743065,-122.169935,Oakland,California,Alameda,Oakland
+1,11,37.814781,-122.282347,Oakland West,California,Alameda,Oakland
+1,12,37.793624,-122.263376,Laney College,California,Alameda,Oakland
+1,13,37.864767,-122.302741,Berkeley- Aquatic Park,California,Alameda,Not in a city
+1,15,37.701222,-121.903019,Pleasanton - Owens Ct,California,Alameda,Pleasanton
+7,8,39.76168,-121.84047,Chico-East Avenue,California,Butte,Chico
+9,1,38.20185,-120.680277,San Andreas-Gold Strike Road,California,Calaveras,San Andreas
+11,7,39.021221,-122.281803,Cortina Indian Rancheria,California,Colusa,Cortina Indian Rancheria
+11,1002,39.18919,-121.99887,Colusa-Sunrise Blvd,California,Colusa,Colusa
+13,2,37.936013,-122.026154,Concord,California,Contra Costa,Concord
+13,1004,37.9604,-122.356811,San Pablo,California,Contra Costa,San Pablo
+19,11,36.78538,-119.77321,Fresno - Garland,California,Fresno,Fresno
+19,500,36.985119,-119.658339,Table Mountain Air Monitoring Site,California,Fresno,Not in a city
+19,2009,36.634225,-120.382331,Tranquillity,California,Fresno,Not in a city
+19,2016,36.710833,-119.7775,Fresno-Foundry,California,Fresno,Fresno
+19,5001,36.819449,-119.716433,Clovis-Villa,California,Fresno,Clovis
+19,5025,36.72639,-119.733,Fresno-Pacific,California,Fresno,Fresno
+23,1004,40.77678,-124.17949,Jacobs,California,Humboldt,Eureka
+25,5,32.67618,-115.48307,Calexico-Ethel Street,California,Imperial,Calexico
+25,7,32.97833,-115.53917,Brawley-220 Main Street,California,Imperial,Brawley
+25,1003,32.79222,-115.56306,El Centro-9th Street,California,Imperial,El Centro
+27,2,37.360684,-118.330783,White Mountain Research Center - Owens Valley Lab,California,Inyo,Not in a city
+27,1003,36.487823,-117.871036,Keeler,California,Inyo,Keeler
+27,1023,37.362137,-118.417478,Bishop Tribe EMO,California,Inyo,Bishop
+29,10,35.385574,-119.015009,Bakersfield-Golden / M St,California,Kern,Bakersfield
+29,11,35.050551,-118.147294,Mojave,California,Kern,Mojave
+29,14,35.356615,-119.062613,Bakersfield-California,California,Kern,Bakersfield
+29,16,35.324636,-118.997627,Bakersfield-Airport (Planz),California,Kern,Bakersfield
+29,18,35.642943,-117.715066,Ridgecrest-Ward,California,Kern,Ridgecrest
+29,19,35.046528,-118.162833,Mojave - CA 58 Business,California,Kern,Mojave
+31,4,36.102244,-119.56565,Corcoran-Patterson,California,Kings,Corcoran
+31,1004,36.31567,-119.643447,Hanford-Irwin,California,Kings,Hanford
+33,3002,39.01893,-122.91333,Lakeport-S. Main Street,California,Lake,Lakeport
+37,2,34.1365,-117.92391,Azusa,California,Los Angeles,Azusa
+37,1103,34.06659,-118.22688,Los Angeles-North Main Street,California,Los Angeles,Los Angeles
+37,1201,34.19925,-118.53276,Reseda,California,Los Angeles,Reseda
+37,1302,33.901389,-118.205,Compton,California,Los Angeles,Compton
+37,1602,34.01029,-118.0685,Pico Rivera #2,California,Los Angeles,Pico Rivera
+37,2005,34.1326,-118.1272,Pasadena,California,Los Angeles,Pasadena
+37,4002,33.82376,-118.18921,Long Beach (North),California,Los Angeles,Long Beach
+37,4004,33.79236,-118.17533,Long Beach (South),California,Los Angeles,Long Beach
+37,4008,33.859662,-118.200707,Long Beach-Route 710 Near Road,California,Los Angeles,Long Beach
+37,9033,34.669739,-118.130511,Lancaster-Division Street,California,Los Angeles,Lancaster
+39,2010,36.953256,-120.034203,Madera-City,California,Madera,Madera
+41,1,37.97231,-122.520004,San Rafael,California,Marin,San Rafael
+45,6,39.15047,-123.20655,Ukiah-Library,California,Mendocino,Ukiah
+45,2002,39.41174,-123.35264,Willits-125 East Commercial Street,California,Mendocino,Willits
+47,3,37.281853,-120.433671,Merced-Coffee,California,Merced,Not in a city
+47,2510,37.30832,-120.480456,Merced-M St,California,Merced,Merced
+51,1,37.64571,-118.96652,Mammoth,California,Mono,Mammoth Lakes
+51,5,37.962069,-119.120278,Lee Vining,California,Mono,Not in a city
+53,2,36.48187,-121.73333,Carmel Valley,California,Monterey,Carmel Valley Village
+53,8,36.209286,-121.126371,King City 2,California,Monterey,King City
+53,1003,36.694261,-121.623271,Salinas 3,California,Monterey,Salinas
+55,4,38.278849,-122.275024,Napa Valley College,California,Napa,Napa
+57,5,39.233477,-121.055608,Grass Valley-Litton Building,California,Nevada,Grass Valley
+57,1001,39.32783,-120.184592,Truckee-Fire Station,California,Nevada,Truckee
+59,7,33.83062,-117.93845,Anaheim,California,Orange,Anaheim
+59,2022,33.63003,-117.67593,Mission Viejo,California,Orange,Mission Viejo
+61,3,38.93568,-121.09959,Auburn-Atwood,California,Placer,Auburn
+61,6,38.74643,-121.26498,Roseville-N Sunrise Ave,California,Placer,Roseville
+63,1006,39.939567,-120.944376,Quincy-N Church Street,California,Plumas,Quincy
+63,1010,39.81336,-120.47069,Portola,California,Plumas,Portola
+65,9,33.447867,-117.088649,Pechanga,California,Riverside,Not in a city
+65,10,33.747236,-115.820124,Joshua Tree NP - Cottonwood Visitor Center,California,Riverside,Joshua Tree National Monument
+65,500,33.71969,-116.1897,29 Palms,California,Riverside,Indio
+65,1016,33.944713,-116.830074,Morongo Air Monitoring Station,California,Riverside,Banning
+65,2002,33.70853,-116.21537,Indio,California,Riverside,Indio
+65,5001,33.85275,-116.54101,Palm Springs,California,Riverside,Palm Springs
+65,8001,33.99958,-117.41601,Rubidoux,California,Riverside,Rubidoux
+65,8005,33.99636,-117.4924,Mira Loma (Van Buren),California,Riverside,Mira Loma
+67,6,38.613779,-121.368014,Sacramento-Del Paso Manor,California,Sacramento,Arden-Arcade
+67,10,38.56844,-121.49311,Sacramento-1309 T Street,California,Sacramento,Sacramento
+67,12,38.683304,-121.164457,Folsom-Natoma St.,California,Sacramento,Folsom
+67,15,38.593322,-121.503795,Sacramento-Bercut Drive,California,Sacramento,Sacramento
+67,5003,38.494475,-121.211131,Sloughhouse,California,Sacramento,Not in a city
+69,2,36.843425,-121.3621,Hollister,California,San Benito,Hollister
+71,27,34.030833,-117.61722,Ontario-Route 60 Near Road,California,San Bernardino,Ontario
+71,306,34.510961,-117.32554,Victorville-Park Avenue,California,San Bernardino,Victorville
+71,2002,34.10002,-117.49201,Fontana,California,San Bernardino,Fontana
+71,8001,34.26464,-116.86147,Big Bear,California,San Bernardino,Big Bear City
+71,9004,34.106678,-117.274063,San Bernardino,California,San Bernardino,San Bernardino
+73,1,32.631242,-117.059088,Chula Vista,California,San Diego,Chula Vista
+73,1016,32.845709,-117.123964,Kearny Villa Rd.,California,San Diego,San Diego
+73,1017,32.985442,-117.08218,San Diego -Rancho Carmel Drive,California,San Diego,San Diego
+73,1022,32.789565,-116.944308,El Cajon - Lexington Elementary School,California,San Diego,El Cajon
+73,1026,32.710177,-117.142665,San Diego - Sherman Elementary School,California,San Diego,San Diego
+73,1201,33.362593,-117.09023,Pala Airpad,California,San Diego,Pala
+75,5,37.765946,-122.399044,San Francisco,California,San Francisco,San Francisco
+77,1002,37.950741,-121.268523,Stockton-Hazelton,California,San Joaquin,Stockton
+77,2010,37.793392,-121.247874,Manteca,California,San Joaquin,Manteca
+79,2004,35.02083,-120.56388,Mesa2,California,San Luis Obispo,Nipomo
+79,2006,35.25651,-120.6693,San Luis Obispo,California,San Luis Obispo,San Luis Obispo
+79,2007,35.04673,-120.58777,Arroyo Grande CDF,California,San Luis Obispo,Arroyo Grande
+79,8002,35.49453,-120.66617,Atascadero,California,San Luis Obispo,Atascadero
+81,1001,37.482934,-122.20337,Redwood City,California,San Mateo,Redwood City
+83,11,34.427775,-119.691218,Santa Barbara,California,Santa Barbara,Santa Barbara
+83,1008,34.942872,-120.435611,Santa Maria,California,Santa Barbara,Santa Maria
+83,2004,34.63782,-120.4575,Lompoc H Street,California,Santa Barbara,Lompoc
+83,2011,34.44551,-119.8284,Goleta,California,Santa Barbara,Goleta
+85,2,36.999571,-121.574684,Gilroy,California,Santa Clara,Gilroy
+85,5,37.348497,-121.894898,San Jose - Jackson,California,Santa Clara,San Jose
+85,6,37.338135,-121.849783,San Jose - Knox Avenue,California,Santa Clara,San Jose
+87,7,36.98332,-121.98822,Santa Cruz,California,Santa Cruz,Live Oak
+87,1005,37.06315,-122.083092,San Lorenzo Valley Middle School,California,Santa Cruz,Not in a city
+89,4,40.55013,-122.38092,Redding - Health Department,California,Shasta,Redding
+93,2001,41.726892,-122.633579,Yreka,California,Siskiyou,Yreka
+95,4,38.102507,-122.237976,Vallejo,California,Solano,Vallejo
+97,4,38.403765,-122.818294,Sebastopol,California,Sonoma,Sebastopol
+99,5,37.642165,-120.994212,Modesto-14th Street,California,Stanislaus,Modesto
+99,6,37.488317,-120.836008,Turlock,California,Stanislaus,Turlock
+101,3,39.138773,-121.618549,Yuba City,California,Sutter,Yuba City
+103,7,40.17093,-122.25556,Red Bluff-Walnut St. District Office,California,Tehama,Red Bluff
+107,9,36.48947,-118.82915,Sequoia & Kings Canyon NPs - Ash Mountain,California,Tulare,Not in a city
+107,2002,36.332179,-119.291228,Visalia-Church,California,Tulare,Visalia
+111,7,34.210169,-118.870509,Thousand Oaks,California,Ventura,Thousand Oaks
+111,9,34.404281,-118.80998,Piru - Pacific,California,Ventura,Piru
+111,1004,34.44806,-119.2313,Ojai - East Ojai Ave,California,Ventura,Ojai
+111,2002,34.276316,-118.683685,Simi Valley-Cochran Street,California,Ventura,Simi Valley
+111,3001,34.25239,-119.143182,El Rio-Rio Mesa School #2,California,Ventura,Not in a city
+113,1003,38.66121,-121.73269,Woodland-Gibson Road,California,Yolo,Woodland
