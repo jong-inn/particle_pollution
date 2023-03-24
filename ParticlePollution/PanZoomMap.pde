@@ -86,8 +86,6 @@ class PanZoomMap extends PanZoomPage {
     return pageLengthToMapLength(pageLen); 
   }
   
-  Table locationTable;
-  
   float mapScale;
   float mapTranslateX;
   float mapTranslateY;
