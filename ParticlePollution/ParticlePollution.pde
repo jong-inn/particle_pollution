@@ -11,13 +11,12 @@ Table windSpeedTable;
 Table windDirectionTable;
 Table locationTable;
 
-float minLatitude, maxLatitude;
-float minLongitude, maxLongitude;
-float minPm25, maxPm25;
-LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03");
-LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03");
-int period = Period.between(startDate, endDate).getDays();
-int count = 0;
+LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
+LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
+int speed = 200;
+int period = Period.between(startDate, endDate).getDays() * speed;
+int day = 0;
+int count = 1;
 
 PanZoomMap panZoomMap;
 
@@ -28,72 +27,73 @@ void setup() {
   // Load tables
   loadRawDataTables();
 
-  // Preprocess tables
-  computeDerivedData();
-
+  // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
 
   // Drop the frame
-  frameRate(1);
+  // frameRate(30);
+
+  // For the test
+  // noLoop();
 }
 
 void draw() {
-  // Radiuses for pm 2.5
-  float minRadius = 20;
-  float maxRadius = 200;
-  
+  // Clear the screen
+  background(230);
+
+  // Draw the bounds of the map
+  fill(250);
+  stroke(111, 87, 0);
+  rectMode(CORNERS);
+  float mapX1 = panZoomMap.longitudeToScreenX(-125.0);
+  float mapY1 = panZoomMap.latitudeToScreenY(32.0);
+  float mapX2 = panZoomMap.longitudeToScreenX(-114.0);
+  float mapY2 = panZoomMap.latitudeToScreenY(43.0);
+  rect(mapX1, mapY1, mapX2, mapY2);
+
+  // Draw the location points
+  for (TableRow locationRow : locationTable.rows()) {
+    DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
+    
+    // Draw city points
+    fill(232, 81, 21);
+    noStroke();
+    ellipseMode(RADIUS);
+    circle(locationData.screenX, locationData.screenY, 2);
+
+    // Draw texts for the local site name
+    textSize(12);
+    textAlign(LEFT, CENTER);
+    float xTextOffset = 2 + 4; // Move the text to the right of the circle
+    fill(111, 87, 0);
+    text(locationData.localSiteName, locationData.screenX + xTextOffset, locationData.screenY);
+  }
+
   if (count < period) {
-    // Clear the screen
-    background(230);
+    println("Count: "+count);
 
-    // Draw the bounds of the map
-    fill(250);
-    stroke(111, 87, 0);
-    rectMode(CORNERS);
-    float mapX1 = panZoomMap.longitudeToScreenX(-125.0);
-    float mapY1 = panZoomMap.latitudeToScreenY(32.0);
-    float mapX2 = panZoomMap.longitudeToScreenX(-114.0);
-    float mapY2 = panZoomMap.latitudeToScreenY(43.0);
-    rect(mapX1, mapY1, mapX2, mapY2);
+    if (count % speed == 0) {
+      day += 1;
+    }
+    println("Date: "+startDate.plusDays(day));
+    String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    textSize(30);
+    textAlign(CENTER, CENTER);
+    fill(0);
+    text(stringDate, 100, 20);
 
-    println("Date: "+startDate.plusDays(count));
-    String stringDate = startDate.plusDays(count).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    for (TableRow row : pm25Table.findRows(stringDate, "Date Local")) {
-      String localSiteName = row.getString("Local Site Name");
-      // println("Local Site Name: "+localSiteName);
-      float latitude = row.getFloat("Latitude");
-      float longitude = row.getFloat("Longitude");
-      float screenX = panZoomMap.longitudeToScreenX(longitude);
-      float screenY = panZoomMap.latitudeToScreenY(latitude);
-      float pm25 = row.getFloat("Arithmetic Mean");
-      float pm25Normalized = (pm25 - minPm25) / (maxPm25- minPm25);
-      if (localSiteName.equals("Livermore")) {
-        println("PM 2.5: "+pm25Normalized);
-      }
-      
-      // Draw city points
-      fill(232, 81, 21);
+    for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
+      DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
+
       noStroke();
+      fill(pm25Data.lerpColor);
       ellipseMode(RADIUS);
-      circle(screenX, screenY, 2);
-
-      // Draw circles for PM 2.5
-      float radius = lerp(minRadius, maxRadius, pm25Normalized);
-      stroke(0);
-      noFill();
-      ellipseMode(RADIUS);
-      circle(screenX, screenY, radius);
-
-      // Draw texts for the local site name
-      textAlign(LEFT, CENTER);
-      float xTextOffset = 2 + 4; // Move the text to the right of the circle
-      fill(111, 87, 0);
-      text(localSiteName, screenX + xTextOffset, screenY);
+      circle(pm25Data.screenX, pm25Data.screenY, pm25Data.radius);
     }
 
     count += 1;
   } else {
-    background(230);
+    // background(230);
     println("Reach the maximum");
   }
 
@@ -157,7 +157,7 @@ void loadRawDataTables() {
 
 void computeDerivedData() {
   // Minimum and maximum of PM 2.5 values
-  minPm25 = TableUtils.findMinFloatInColumn(pm25Table, "Arithmetic Mean");
-  maxPm25 = TableUtils.findMaxFloatInColumn(pm25Table, "Arithmetic Mean");
-  println("PM 2.5 range:", minPm25, "to", maxPm25);
+  // minPm25 = TableUtils.findMinFloatInColumn(pm25Table, "Arithmetic Mean");
+  // maxPm25 = TableUtils.findMaxFloatInColumn(pm25Table, "Arithmetic Mean");
+  // println("PM 2.5 range:", minPm25, "to", maxPm25);
 }
