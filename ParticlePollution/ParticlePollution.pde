@@ -119,7 +119,7 @@ void mouseWheel(MouseEvent e) {
 
 void loadRawDataTables() {
   // Load the pm25 table
-  pm25Table = loadTable("daily_88101_2020_california_filtered.csv", "header");
+  pm25Table = loadTable("daily_88101_2020_california_filtered_drop_duplicates.csv", "header");
   println("pm25 table:", pm25Table.getRowCount(), "x", pm25Table.getColumnCount());
   // Print several rows of the pm25 table
   TableUtils.printNRowFromTable(pm25Table, 3);
