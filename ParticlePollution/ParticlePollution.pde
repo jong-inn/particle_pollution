@@ -85,6 +85,11 @@ void draw() {
   }
 
   // Draw the location points
+  
+  // for Summary 
+  int countCity = 0;
+  String[] cityName = new String[0];
+  
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
     
@@ -100,7 +105,18 @@ void draw() {
     float xTextOffset = 2 + 4; // Move the text to the right of the circle
     fill(111, 87, 0);
     text(locationData.localSiteName, locationData.screenX + xTextOffset, locationData.screenY);
+    
+    // for Summary 
+    countCity += 1; //total num of city
+    cityName = append(cityName, locationData.localSiteName);
+    
   }
+  
+  // for Summary 
+  float[] totalValue = new float[countCity];
+  int numDays = Period.between(startDate, endDate).getDays();
+  float[] avgValue = new float[countCity];
+  
 
   if (count < period) {
     println("Count: "+count);
@@ -114,9 +130,15 @@ void draw() {
     textAlign(CENTER, CENTER);
     fill(0);
     text(stringDate, 100, 20);
+    
+    int numCity = 1; // the _th city
 
     for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
       DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
+      
+      // for Summary 
+      totalValue[numCity] += pm25Data.pm25;
+      numCity += 1;
 
       noStroke();
       fill(pm25Data.lerpColor);
@@ -130,6 +152,56 @@ void draw() {
   } else {
     // background(230);
     println("Reach the maximum");
+  }
+  
+  // for Summary 
+  for (int i = 0; i < countCity; i++){
+    avgValue[i] = totalValue[i] / numDays;
+  }
+  //for Summary - find top 5
+  String [] top5Name = new String[5];
+  float [] top5Value = new float[5];
+  for( int top = 0; top < 5; top++){
+    int maxIndex = 0;
+    for (int findMax = 0; findMax <avgValue.length; findMax++){
+      if (avgValue[findMax] > avgValue[maxIndex]){
+        maxIndex = findMax; 
+      }
+    }
+    top5Name[top] = cityName[maxIndex];
+    top5Value[top] = avgValue[maxIndex];
+    avgValue[maxIndex] = 0;
+  }  
+  
+  //rectangle with details
+  fill(250);
+  stroke(111, 87, 0);
+  rect(1100, -10, 1610, 910);
+  
+  //Summary
+  fill(0);
+  textSize(20);
+  textAlign(LEFT, CENTER);
+  text("Top 5 Average", 1120, 20);
+  line(1130, 40, 1130, 300);
+  line(1130, 300, 1550, 300);
+  fill(0);
+  textSize(10);
+  textAlign(CENTER, CENTER);
+  text("0.0",1140, 310);
+  text("0.5",1240, 310);
+  text("1.0",1340, 310);
+  text("1.5",1440, 310);
+  text("2.0",1540, 310);
+  for(int top5=0; top5 <5; top5++){
+    float amt = top5Value[top5]/2; 
+    float bar = lerp(0,400,amt);
+    fill(#5E5F5F);
+    rect(1140, 60+(top5*50), 1140+bar, 60+(top5*50)+25);
+    fill(0);
+    textSize(10);
+    textAlign(LEFT, CENTER);
+    text(top5Name[top5]+": "+top5Value[top5], 1140, 60+(top5*50)-10);
   }
 
 }
