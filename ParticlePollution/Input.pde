@@ -27,3 +27,28 @@ LocalDate getLocalDate(String s) {
         }
     }
 }
+
+// Returns the municipality currently under the mouse cursor so that it can be highlighted or selected
+// with a mouse click.  If the municipalities overlap and more than one is under the cursor, the
+// smallest municipality will be returned, since this is usually the hardest one to select.
+String getLocationUnderMouse(Table locationTable, PanZoomMap panZoomMap) {
+  float smallestRadiusSquared = Float.MAX_VALUE;
+  String underMouse = "";
+  for (TableRow locationRow : locationTable.rows()) {
+    
+
+    // String municipality = rowData.getString("Municipality");
+    // float latitude = rowData.getFloat("Latitude");
+    // float longitude = rowData.getFloat("Longitude");
+    // float screenX = panZoomMap.longitudeToScreenX(longitude);
+    // float screenY = panZoomMap.latitudeToScreenY(latitude);
+    // float distSquared = (mouseX-screenX)*(mouseX-screenX) + (mouseY-screenY)*(mouseY-screenY);
+    // float radius = getRadius(municipality);
+    // float radiusSquared = constrain(radius*radius, 1, height);
+    // if ((distSquared <= radiusSquared) && (radiusSquared < smallestRadiusSquared)) {
+    //   underMouse = municipality;
+    //   smallestRadiusSquared = radiusSquared;
+    }
+  }
+  return underMouse;  
+}
