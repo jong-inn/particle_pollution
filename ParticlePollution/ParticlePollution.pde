@@ -17,6 +17,7 @@ int speed = 200;
 int period = Period.between(startDate, endDate).getDays() * speed;
 int day = 0;
 int count = 1;
+boolean status = false; // Paused in the beginning
 
 PanZoomMap panZoomMap;
 
@@ -51,6 +52,38 @@ void draw() {
   float mapY2 = panZoomMap.latitudeToScreenY(43.0);
   rect(mapX1, mapY1, mapX2, mapY2);
 
+  // Draw the play/stop status
+  if (status == true) {
+    // For the background circle
+    fill(169, 169, 169); // Darkgray
+    noStroke();
+    ellipseMode(RADIUS);
+    circle(1560, 40, 15);
+
+    // For the two thin rectangles
+    fill(0);
+    noStroke();
+    rectMode(CORNER);
+    rect(1552, 30, 5, 21);
+    rect(1563, 30, 5, 21);
+
+  } else if (status == false) {
+    // For the background circle
+    fill(169, 169, 169); // Darkgray
+    noStroke();
+    ellipseMode(RADIUS);
+    circle(1560, 40, 15);
+
+    // For the triangle
+    fill(0);
+    noStroke();
+    beginShape();
+    vertex(1553, 30);
+    vertex(1553, 50);
+    vertex(1571, 40);
+    endShape(CLOSE);
+  }
+
   // Draw the location points
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
@@ -72,7 +105,7 @@ void draw() {
   if (count < period) {
     println("Count: "+count);
 
-    if (count % speed == 0) {
+    if (count % speed == 0 && status == true) {
       day += 1;
     }
     println("Date: "+startDate.plusDays(day));
@@ -91,7 +124,9 @@ void draw() {
       circle(pm25Data.screenX, pm25Data.screenY, pm25Data.radius);
     }
 
-    count += 1;
+    if (status == true) {
+      count += 1;
+    }
   } else {
     // background(230);
     println("Reach the maximum");
@@ -102,6 +137,15 @@ void draw() {
 void keyPressed() {
   if (key == ' ') {
     println("current scale: ", panZoomMap.scale, " current translation: ", panZoomMap.translateX, "x", panZoomMap.translateY);
+  } else if (key == ENTER || key == RETURN) {
+    // Play and stop by the enter or return key
+    if (status == true) {
+      status = false;
+      println("pause");
+    } else if (status == false) {
+      status = true;
+      println("play");
+    }
   }
 }
 
