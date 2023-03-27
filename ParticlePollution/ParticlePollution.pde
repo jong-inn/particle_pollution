@@ -19,6 +19,10 @@ int day = 0;
 int count = 1;
 boolean status = false; // Paused in the beginning
 
+float[] avgValue; 
+String [] top5Name = new String[5]; // summary
+float [] top5Value = new float[5]; // summary
+
 PanZoomMap panZoomMap;
 
 void setup() {
@@ -36,6 +40,41 @@ void setup() {
 
   // For the test
   // noLoop();
+
+  // for Summary 
+  int countCity = 0;
+  String[] cityName = new String[0];
+  for (TableRow locationRow : locationTable.rows()) {
+    DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
+    countCity += 1; //total num of city
+    cityName = append(cityName, locationData.localSiteName);
+  }
+  String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+  float[] totalValue = new float[countCity];
+  int numDays = Period.between(startDate, endDate).getDays();
+  avgValue = new float[countCity];
+  int numCity = 0; // the _th city
+  for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
+    DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
+    totalValue[numCity] += pm25Data.pm25;
+    numCity += 1;
+  }
+  for (int i = 0; i < countCity; i++){
+    avgValue[i] = totalValue[i] / numDays;
+  }
+  // summary - find top 5
+  for( int top = 0; top < 5; top++){
+    int maxIndex = 0;
+    for (int findMax = 0; findMax <avgValue.length; findMax++){
+      if (avgValue[findMax] > avgValue[maxIndex]){
+        maxIndex = findMax; 
+      }
+    }
+    top5Name[top] = cityName[maxIndex];
+    top5Value[top] = avgValue[maxIndex];
+    avgValue[maxIndex] = 0;
+  }  
+  
 }
 
 void draw() {
@@ -53,43 +92,38 @@ void draw() {
   rect(mapX1, mapY1, mapX2, mapY2);
 
   // Draw the play/stop status
-  if (status == true) {
-    // For the background circle
-    fill(169, 169, 169); // Darkgray
-    noStroke();
-    ellipseMode(RADIUS);
-    circle(1560, 40, 15);
+  //if (status == true) {
+  //  // For the background circle
+  //  fill(169, 169, 169); // Darkgray
+  //  noStroke();
+  //  ellipseMode(RADIUS);
+  //  circle(1560, 40, 15);
 
-    // For the two thin rectangles
-    fill(0);
-    noStroke();
-    rectMode(CORNER);
-    rect(1552, 30, 5, 21);
-    rect(1563, 30, 5, 21);
+  //  // For the two thin rectangles
+  //  fill(0);
+  //  noStroke();
+  //  rectMode(CORNER);
+  //  rect(1552, 30, 5, 21);
+  //  rect(1563, 30, 5, 21);
 
-  } else if (status == false) {
-    // For the background circle
-    fill(169, 169, 169); // Darkgray
-    noStroke();
-    ellipseMode(RADIUS);
-    circle(1560, 40, 15);
+  //} else if (status == false) {
+  //  // For the background circle
+  //  fill(169, 169, 169); // Darkgray
+  //  noStroke();
+  //  ellipseMode(RADIUS);
+  //  circle(1560, 40, 15);
 
-    // For the triangle
-    fill(0);
-    noStroke();
-    beginShape();
-    vertex(1553, 30);
-    vertex(1553, 50);
-    vertex(1571, 40);
-    endShape(CLOSE);
-  }
+  //  // For the triangle
+  //  fill(0);
+  //  noStroke();
+  //  beginShape();
+  //  vertex(1553, 30);
+  //  vertex(1553, 50);
+  //  vertex(1571, 40);
+  //  endShape(CLOSE);
+  //}
 
   // Draw the location points
-  
-  // for Summary 
-  int countCity = 0;
-  String[] cityName = new String[0];
-  
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
     
@@ -106,17 +140,7 @@ void draw() {
     fill(111, 87, 0);
     text(locationData.localSiteName, locationData.screenX + xTextOffset, locationData.screenY);
     
-    // for Summary 
-    countCity += 1; //total num of city
-    cityName = append(cityName, locationData.localSiteName);
-    
   }
-  
-  // for Summary 
-  float[] totalValue = new float[countCity];
-  int numDays = Period.between(startDate, endDate).getDays();
-  float[] avgValue = new float[countCity];
-  
 
   if (count < period) {
     println("Count: "+count);
@@ -130,15 +154,9 @@ void draw() {
     textAlign(CENTER, CENTER);
     fill(0);
     text(stringDate, 100, 20);
-    
-    int numCity = 1; // the _th city
 
     for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
       DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
-      
-      // for Summary 
-      totalValue[numCity] += pm25Data.pm25;
-      numCity += 1;
 
       noStroke();
       fill(pm25Data.lerpColor);
@@ -154,31 +172,12 @@ void draw() {
     println("Reach the maximum");
   }
   
-  // for Summary 
-  for (int i = 0; i < countCity; i++){
-    avgValue[i] = totalValue[i] / numDays;
-  }
-  //for Summary - find top 5
-  String [] top5Name = new String[5];
-  float [] top5Value = new float[5];
-  for( int top = 0; top < 5; top++){
-    int maxIndex = 0;
-    for (int findMax = 0; findMax <avgValue.length; findMax++){
-      if (avgValue[findMax] > avgValue[maxIndex]){
-        maxIndex = findMax; 
-      }
-    }
-    top5Name[top] = cityName[maxIndex];
-    top5Value[top] = avgValue[maxIndex];
-    avgValue[maxIndex] = 0;
-  }  
-  
   //rectangle with details
   fill(250);
   stroke(111, 87, 0);
   rect(1100, -10, 1610, 910);
   
-  //Summary
+  // summary
   fill(0);
   textSize(20);
   textAlign(LEFT, CENTER);
@@ -187,14 +186,12 @@ void draw() {
   line(1130, 300, 1550, 300);
   fill(0);
   textSize(10);
-  textAlign(CENTER, CENTER);
-  text("0.0",1140, 310);
-  text("0.5",1240, 310);
-  text("1.0",1340, 310);
-  text("1.5",1440, 310);
-  text("2.0",1540, 310);
+  textAlign(LEFT, CENTER);
+  text("0",1140, 310);
+  text(top5Value[0]/2,1340, 310);
+  text(top5Value[0],1540, 310);
   for(int top5=0; top5 <5; top5++){
-    float amt = top5Value[top5]/2; 
+    float amt = top5Value[top5]/top5Value[0]; 
     float bar = lerp(0,400,amt);
     fill(#5E5F5F);
     rect(1140, 60+(top5*50), 1140+bar, 60+(top5*50)+25);
