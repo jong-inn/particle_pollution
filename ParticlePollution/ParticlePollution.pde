@@ -41,7 +41,7 @@ void setup() {
   // For the test
   // noLoop();
 
-  // for Summary 
+  // for Summary - cityName
   int countCity = 0;
   String[] cityName = new String[0];
   for (TableRow locationRow : locationTable.rows()) {
@@ -49,19 +49,25 @@ void setup() {
     countCity += 1; //total num of city
     cityName = append(cityName, locationData.localSiteName);
   }
-  String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+  // for Summary - totalValue / avgValue
   float[] totalValue = new float[countCity];
-  int numDays = Period.between(startDate, endDate).getDays();
   avgValue = new float[countCity];
-  int numCity = 0; // the _th city
-  for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
-    DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
-    totalValue[numCity] += pm25Data.pm25;
-    numCity += 1;
+  for (int day = 0; day < Period.between(startDate, endDate).getDays(); day++){
+    String targetDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    for (TableRow pm25Row : pm25Table.findRows(targetDate, "Date Local")){
+      DataManipulation pm25Data = new DataManipulation(pm25Row , panZoomMap, "pm25");
+      for (int numCity = 0; numCity < countCity; numCity++ ) {
+        if (pm25Data.localSiteName.equals(cityName[numCity])){
+          totalValue[numCity] += pm25Data.pm25;
+        }
+      }   
+    }
   }
   for (int i = 0; i < countCity; i++){
-    avgValue[i] = totalValue[i] / numDays;
+    avgValue[i] = totalValue[i] / Period.between(startDate, endDate).getDays();
   }
+
   // summary - find top 5
   for( int top = 0; top < 5; top++){
     int maxIndex = 0;
