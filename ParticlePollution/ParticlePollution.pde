@@ -19,9 +19,8 @@ int day = 0;
 int count = 1;
 boolean status = false; // Paused in the beginning
 
-float[] avgValue; 
-String [] top5Name = new String[5]; // summary
-float [] top5Value = new float[5]; // summary
+String [] top5Name; // summary
+float [] top5Value; // summary
 
 PanZoomMap panZoomMap;
 
@@ -40,41 +39,11 @@ void setup() {
 
   // For the test
   // noLoop();
-
-  // for Summary 
-  int countCity = 0;
-  String[] cityName = new String[0];
-  for (TableRow locationRow : locationTable.rows()) {
-    DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
-    countCity += 1; //total num of city
-    cityName = append(cityName, locationData.localSiteName);
-  }
-  String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-  float[] totalValue = new float[countCity];
-  int numDays = Period.between(startDate, endDate).getDays();
-  avgValue = new float[countCity];
-  int numCity = 0; // the _th city
-  for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
-    DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
-    totalValue[numCity] += pm25Data.pm25;
-    numCity += 1;
-  }
-  for (int i = 0; i < countCity; i++){
-    avgValue[i] = totalValue[i] / numDays;
-  }
-  // summary - find top 5
-  for( int top = 0; top < 5; top++){
-    int maxIndex = 0;
-    for (int findMax = 0; findMax <avgValue.length; findMax++){
-      if (avgValue[findMax] > avgValue[maxIndex]){
-        maxIndex = findMax; 
-      }
-    }
-    top5Name[top] = cityName[maxIndex];
-    top5Value[top] = avgValue[maxIndex];
-    avgValue[maxIndex] = 0;
-  }  
   
+  DataBuckets summary = new DataBuckets(locationTable, pm25Table, startDate, endDate);
+  top5Name = summary.topName(5);
+  top5Value = summary.topValue(5);
+
 }
 
 void draw() {
