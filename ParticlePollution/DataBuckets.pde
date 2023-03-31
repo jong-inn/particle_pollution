@@ -7,18 +7,20 @@ class DataBuckets{
   String[] cityName;
   float[] avgValue;
   int[] top;
-  Table locationData;
-  Table data;
+  Table summaryTable;
+  Table pm25Table;
   
-  public DataBuckets(Table locationData, Table data){
-    this.locationData = locationData;
-    this.data = data;
+  public DataBuckets(Table locationTable, Table pm25Table){
+    this.summaryTable = locationTable;
+    summaryTable.addColumn("PM25 Average", Table.FLOAT); // add a average column
+    this.pm25Table = pm25Table;
     calcAvg();
   }
   
-  public DataBuckets(Table locationData, Table data, LocalDate start, LocalDate end){
-    this.locationData = locationData;
-    this.data = data;
+  public DataBuckets(Table locationTable, Table pm25Table, LocalDate start, LocalDate end){
+    this.summaryTable = locationTable;
+    summaryTable.addColumn("PM25 Average", Table.FLOAT); // add a average column
+    this.pm25Table = pm25Table;
     this.start = start;
     this.end = end;
     calcAvg();
@@ -28,10 +30,10 @@ class DataBuckets{
     // for Summary - cityName
     int countCity = 0;
     cityName = new String[0];
-    for (TableRow locationRow : locationData.rows()) {
-      DataManipulation location = new DataManipulation(locationRow, panZoomMap, "location");
+    for (TableRow summaryRow : summaryTable.rows()) {
+      DataManipulation summaryData = new DataManipulation(summaryRow, panZoomMap, "location");
       countCity += 1; //total num of city
-      cityName = append(cityName, location.localSiteName);
+      cityName = append(cityName, summaryData.localSiteName);
     }
 
     // for Summary - totalValue / avgValue
@@ -39,7 +41,7 @@ class DataBuckets{
     avgValue = new float[countCity];
     for (int day = 0; day < Period.between(startDate, endDate).getDays(); day++){
       String targetDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-      for (TableRow pm25Row : data.findRows(targetDate, "Date Local")){
+      for (TableRow pm25Row : pm25Table.findRows(targetDate, "Date Local")){
         DataManipulation pm25Data = new DataManipulation(pm25Row , panZoomMap, "pm25");
         for (int numCity = 0; numCity < countCity; numCity++ ) {
           if (pm25Data.localSiteName.equals(cityName[numCity])){
@@ -50,6 +52,12 @@ class DataBuckets{
     }
     for (int i = 0; i < countCity; i++){
       avgValue[i] = totalValue[i] / Period.between(startDate, endDate).getDays();
+    }
+
+    // put averages into the average column
+    for (int i=0; i<cityName.length; i++) {
+      TableRow summaryRow = summaryTable.findRow(cityName[i], "Local Site Name"); // find the row containing the specific Local Site Name
+      summaryRow.setFloat("PM25 Average", avgValue[i]); // put the average into the PM25 Average column
     }
   }
   
