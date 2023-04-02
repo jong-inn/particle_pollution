@@ -1,11 +1,11 @@
 import java.lang.Exception;
 
 class DataManipulation {
-    String localSiteName;
+    String localSiteName, type;
     float latitude, longitude;
     float screenX, screenY;
     float pm25, pm25Normalized;
-    float windSpeed, windSpeedNormalized;
+    float windSpeed, windSpeedNormalized, rotationSpeed;
     float windDirection;
     float radius;
     color lerpColor;
@@ -14,10 +14,17 @@ class DataManipulation {
     float maxPm25 = 20.0;
     float minRadius = 3.0;
     float maxRadius = 10.0;
-    color lowestPm25Color = color(255, 224, 121);
-    color highestPm25Color = color(232, 81, 21);
+
+    float minWindSpeed = 0.0;
+    float maxWindSpeed = 10.0;
+    float minRotationSpeed = 0.0;
+    float maxRotationSpeed = 1.0;
+
+    color lowestPm25Color = color(255, 131, 0); // Orange
+    color highestPm25Color = color(139, 0, 0); // Dark Red
 
     public DataManipulation(TableRow row, PanZoomMap panZoomMap, String type) {
+        this.type = type;
         if (type.equals("location")) {
             fitLocation(row, panZoomMap);
         } else if (type.equals("pm25")) {
@@ -41,8 +48,18 @@ class DataManipulation {
         this.longitude = row.getFloat("Longitude");
         this.screenX = panZoomMap.longitudeToScreenX(longitude);
         this.screenY = panZoomMap.latitudeToScreenY(latitude);
-        this.pm25 = row.getFloat("Arithmetic Mean");
-        this.pm25Normalized = (pm25 - minPm25) / (maxPm25- minPm25);
+        try {
+            this.pm25 = row.getFloat("Arithmetic Mean");
+        } catch (Exception e) {
+            this.pm25 = row.getFloat("PM25 Average");
+        }
+        if (pm25 < minPm25) {
+            this.pm25Normalized = 0.0;
+        } else if (pm25 > maxPm25) {
+            this.pm25Normalized = 1.0;
+        } else {
+            this.pm25Normalized = (pm25 - minPm25) / (maxPm25 - minPm25);
+        }
         this.radius = lerp(minRadius, maxRadius, pm25Normalized);
         this.lerpColor = lerpColorLab(lowestPm25Color, highestPm25Color, pm25Normalized);
     }
@@ -53,6 +70,16 @@ class DataManipulation {
         this.longitude = row.getFloat("Longitude");
         this.screenX = panZoomMap.longitudeToScreenX(longitude);
         this.screenY = panZoomMap.latitudeToScreenY(latitude);
+        this.windDirection = row.getFloat("Arithmetic Mean Direction");
+        this.windSpeed = row.getFloat("Arithmetic Mean Speed");
+        if (windSpeed < minWindSpeed) {
+            this.windSpeedNormalized = 0.0;
+        } else if (windSpeed > maxWindSpeed) {
+            this.windSpeedNormalized = 1.0;
+        } else {
+            this.windSpeedNormalized = (windSpeed - minWindSpeed) / (maxWindSpeed - minWindSpeed);
+        }
+        this.rotationSpeed = lerp(minRotationSpeed, maxRotationSpeed, windSpeedNormalized);
     }
  
     color lerpColorLab(color c1, color c2, float amt) {
