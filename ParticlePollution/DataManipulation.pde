@@ -1,7 +1,7 @@
 import java.lang.Exception;
 
 class DataManipulation {
-    String localSiteName;
+    String localSiteName, type;
     float latitude, longitude;
     float screenX, screenY;
     float pm25, pm25Normalized;
@@ -24,6 +24,7 @@ class DataManipulation {
     color highestPm25Color = color(139, 0, 0); // Dark Red
 
     public DataManipulation(TableRow row, PanZoomMap panZoomMap, String type) {
+        this.type = type;
         if (type.equals("location")) {
             fitLocation(row, panZoomMap);
         } else if (type.equals("pm25")) {

@@ -20,6 +20,10 @@ int count = 0;
 boolean status = false; // Paused in the beginning
 boolean windStatus = true; // Option for showing the wind data
 
+String highlightedLocation = "";
+String selectedLocation1 = "";
+String selectedLocation2 = "";
+
 String [] top5Name; // summary
 float [] top5Value; // summary
 
@@ -47,6 +51,10 @@ void setup() {
 void draw() {
   // Clear the screen
   background(230);
+
+  // Get highlighted location
+  highlightedLocation = getLocationUnderMouse(locationTable, panZoomMap);
+  // println("Highlighted Location: "+highlightedLocation);
 
   // Draw the bounds of the map
   fill(250);
@@ -97,20 +105,23 @@ void draw() {
   // Draw the location points
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
+
+    // Highlight the locations
+    highlightingLocations(locationData, highlightedLocation, selectedLocation1, selectedLocation2);
+
+    // If the pivot location is selected, filter out the remaining area
+    if (selectedLocation1.equals(locationData.localSiteName)) {
+      noStroke();
+      fill(211, 211, 211, 60);
+      ellipseMode(RADIUS);
+      circle(locationData.screenX, locationData.screenY, 50);
+    }
     
     // Draw city points
     fill(232, 81, 21);
     noStroke();
     ellipseMode(RADIUS);
     circle(locationData.screenX, locationData.screenY, 2);
-
-    // Draw texts for the local site name
-    textSize(12);
-    textAlign(LEFT, CENTER);
-    float xTextOffset = 2 + 4; // Move the text to the right of the circle
-    fill(111, 87, 0);
-    text(locationData.localSiteName, locationData.screenX + xTextOffset, locationData.screenY);
-    
   }
 
   // Store the current coordination
@@ -128,13 +139,10 @@ void draw() {
     if (status == true) {
       count += 1;
     }
-  } else if (count != 0 && count < period) {
-    println("Count: "+count);
-
-    if (count % speed == 0 && status == true) {
+  } else if (count != 0) {
+    if (count % speed == 0 && status == true && day < (period / speed)) {
       day += 1;
     }
-    println("Date: "+startDate.plusDays(day));
     String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     textSize(30);
     textAlign(CENTER, CENTER);
@@ -144,10 +152,14 @@ void draw() {
     for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
       DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
 
+      // Highlight the locations
+      highlightingLocations(pm25Data, highlightedLocation, selectedLocation1, selectedLocation2);
+
       noStroke();
       fill(pm25Data.lerpColor);
       ellipseMode(RADIUS);
       circle(pm25Data.screenX, pm25Data.screenY, pm25Data.radius);
+
     }
 
     if (windStatus == true) {
@@ -177,9 +189,6 @@ void draw() {
     if (status == true) {
       count += 1;
     }
-  } else {
-    // background(230);
-    println("Reach the maximum");
   }
 
   // Restore the first coordination
@@ -233,6 +242,23 @@ void keyPressed() {
 }
 
 void mousePressed() {
+  // Select the pivot location
+  if (highlightedLocation != "" && selectedLocation1.equals("") && !selectedLocation2.equals(highlightedLocation)) {
+    selectedLocation1 = highlightedLocation;
+    println("Selected Location 1: " + selectedLocation1);
+  // Select the comparing location
+  } else if (highlightedLocation != "" && selectedLocation2.equals("") && !selectedLocation1.equals(highlightedLocation)) {
+    selectedLocation2 = highlightedLocation;
+    println("Selected Location 2: " + selectedLocation2);
+  // Unselect the pviot location
+  } else if (highlightedLocation.equals(selectedLocation1)) {
+    println("Unselect the Location 1: "+selectedLocation1);
+    selectedLocation1 = "";
+  // Unselect the comparing location
+  } else if (highlightedLocation.equals(selectedLocation2)) {
+    println("Unselect the Location 2: "+selectedLocation2);
+    selectedLocation2 = "";
+  }
   panZoomMap.mousePressed();
 }
 
