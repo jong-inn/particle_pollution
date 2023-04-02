@@ -7,43 +7,41 @@ import java.time.format.DateTimeFormatter;
 // === GLOBAL VARIBALES ===
 
 Table pm25Table;
-Table windSpeedTable;
-Table windDirectionTable;
+Table windTable;
 Table locationTable;
+PImage map;
 
 LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 int speed = 200;
 int period = Period.between(startDate, endDate).getDays() * speed;
 int day = 0;
-int count = 1;
+int count = 0;
 boolean status = false; // Paused in the beginning
+boolean windStatus = true; // Option for showing the wind data
 
 String [] top5Name; // summary
 float [] top5Value; // summary
 
 PanZoomMap panZoomMap;
+DataBuckets summary;
 
 void setup() {
   // Size of the graphics window
   size(1600,900);
+
+  // Load a California map
+  map = loadImage("california_simple_map.png");
 
   // Load tables
   loadRawDataTables();
 
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
-
-  // Drop the frame
-  // frameRate(30);
-
-  // For the test
-  // noLoop();
   
-  DataBuckets summary = new DataBuckets(locationTable, pm25Table, startDate, endDate);
-  top5Name = summary.topName(5);
-  top5Value = summary.topValue(5);
-
+  summary = new DataBuckets("pm25", locationTable, pm25Table, startDate, endDate);
+  top5Name = summary.pm25TopName(5);
+  top5Value = summary.pm25TopValue(5);
 }
 
 void draw() {
@@ -59,6 +57,10 @@ void draw() {
   float mapX2 = panZoomMap.longitudeToScreenX(-114.0);
   float mapY2 = panZoomMap.latitudeToScreenY(43.0);
   rect(mapX1, mapY1, mapX2, mapY2);
+
+  // Draw the California map
+  imageMode(CORNERS);
+  image(map, mapX1, mapY1, mapX2, mapY2);
 
   // Draw the play/stop status
   //if (status == true) {
@@ -111,7 +113,22 @@ void draw() {
     
   }
 
-  if (count < period) {
+  // Store the current coordination
+  pushMatrix();
+
+  if (count == 0) {
+    for (TableRow summaryRow : summary.summaryTable.rows()) {
+      DataManipulation summaryData = new DataManipulation(summaryRow, panZoomMap, "pm25");
+      
+      noStroke();
+      fill(summaryData.lerpColor);
+      ellipseMode(RADIUS);
+      circle(summaryData.screenX, summaryData.screenY, summaryData.radius);
+    }
+    if (status == true) {
+      count += 1;
+    }
+  } else if (count != 0 && count < period) {
     println("Count: "+count);
 
     if (count % speed == 0 && status == true) {
@@ -133,6 +150,30 @@ void draw() {
       circle(pm25Data.screenX, pm25Data.screenY, pm25Data.radius);
     }
 
+    if (windStatus == true) {
+      for (TableRow windRow : windTable.findRows(stringDate, "Date Local")) {
+        DataManipulation windData = new DataManipulation(windRow, panZoomMap, "wind");
+
+        pushMatrix();
+        translate(windData.screenX, windData.screenY); // Translate to the center of the location
+        rotate(radians(windData.windDirection - 180));
+        rectMode(CORNERS);
+        noStroke();
+        fill(30, 144, 255); // Dodgerblue
+        rect(-1, 7, 1, -7);
+
+        pushMatrix();
+        translate(0, 7); // Translate to the top of the rectangle
+        rotate(frameCount * windData.rotationSpeed);
+        noStroke();
+        fill(0, 191, 255); // Deepskyblue
+        star(0, 0, 3, 7, 5);
+        popMatrix();
+
+        popMatrix();
+      }
+    }
+
     if (status == true) {
       count += 1;
     }
@@ -140,10 +181,14 @@ void draw() {
     // background(230);
     println("Reach the maximum");
   }
+
+  // Restore the first coordination
+  popMatrix();
   
   //rectangle with details
   fill(250);
   stroke(111, 87, 0);
+  rectMode(CORNERS);
   rect(1100, -10, 1610, 910);
   
   // summary
@@ -201,7 +246,7 @@ void mouseWheel(MouseEvent e) {
 
 void loadRawDataTables() {
   // Load the pm25 table
-  pm25Table = loadTable("daily_88101_2020_california_filtered_drop_duplicates.csv", "header");
+  pm25Table = loadTable("daily_88101_2020_california_final.csv", "header");
   println("pm25 table:", pm25Table.getRowCount(), "x", pm25Table.getColumnCount());
   // Print several rows of the pm25 table
   TableUtils.printNRowFromTable(pm25Table, 3);
@@ -210,28 +255,18 @@ void loadRawDataTables() {
   println();
   println();
   
-  // Load the wind speed table
-  windSpeedTable = loadTable("daily_WIND_2020_california_speed.csv", "header");
-  println("wind speed table:", windSpeedTable.getRowCount(), "x", windSpeedTable.getColumnCount());
+  // Load the wind table
+  windTable = loadTable("daily_WIND_2020_california_integrated_final.csv", "header");
+  println("wind table:", windTable.getRowCount(), "x", windTable.getColumnCount());
   // Print several rows of the wind speed table
-  TableUtils.printNRowFromTable(windSpeedTable, 3);
-
-  println();
-  println();
-  println();
-
-  // Load the wind direction table
-  windDirectionTable = loadTable("daily_WIND_2020_california_direction.csv", "header");
-  println("wind direction table:", windDirectionTable.getRowCount(), "x", windDirectionTable.getColumnCount());
-  // Print several rows of the wind table
-  TableUtils.printNRowFromTable(windDirectionTable, 3);
+  TableUtils.printNRowFromTable(windTable, 3);
 
   println();
   println();
   println();
 
   // Load the location table
-  locationTable = loadTable("locations.csv", "header");
+  locationTable = loadTable("locations_final.csv", "header");
   println("location table:", locationTable.getRowCount(), "x", locationTable.getColumnCount());
   // Print several rows of the locations table
   TableUtils.printNRowFromTable(locationTable, 3);
@@ -242,4 +277,19 @@ void computeDerivedData() {
   // minPm25 = TableUtils.findMinFloatInColumn(pm25Table, "Arithmetic Mean");
   // maxPm25 = TableUtils.findMaxFloatInColumn(pm25Table, "Arithmetic Mean");
   // println("PM 2.5 range:", minPm25, "to", maxPm25);
+}
+
+void star(float x, float y, float radius1, float radius2, int npoints) {
+  float angle = TWO_PI / npoints;
+  float halfAngle = angle/2.0;
+  beginShape();
+  for (float a = 0; a < TWO_PI; a += angle) {
+    float sx = x + cos(a) * radius2;
+    float sy = y + sin(a) * radius2;
+    vertex(sx, sy);
+    sx = x + cos(a+halfAngle) * radius1;
+    sy = y + sin(a+halfAngle) * radius1;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
 }
