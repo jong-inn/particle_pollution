@@ -28,7 +28,8 @@ String [] top5Name; // summary
 float [] top5Value; // summary
 
 PanZoomMap panZoomMap;
-DataBuckets summary;
+DataBuckets summaryPm25;
+DataBuckets summaryWind;
 
 void setup() {
   // Size of the graphics window
@@ -43,9 +44,11 @@ void setup() {
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
   
-  summary = new DataBuckets("pm25", locationTable, pm25Table, startDate, endDate);
-  top5Name = summary.pm25TopName(5);
-  top5Value = summary.pm25TopValue(5);
+  summaryPm25 = new DataBuckets("pm25", locationTable, pm25Table, startDate, endDate);
+  top5Name = summaryPm25.pm25TopName(5);
+  top5Value = summaryPm25.pm25TopValue(5);
+
+  summaryWind = new DataBuckets("wind", locationTable, windTable, startDate, endDate);
 }
 
 void draw() {
@@ -128,14 +131,42 @@ void draw() {
   pushMatrix();
 
   if (count == 0) {
-    for (TableRow summaryRow : summary.summaryTable.rows()) {
-      DataManipulation summaryData = new DataManipulation(summaryRow, panZoomMap, "pm25");
+    // Draw the average PM25 data on the summary map
+    for (TableRow summaryPm25Row : summaryPm25.summaryTable.rows()) {
+      DataManipulation summaryPm25Data = new DataManipulation(summaryPm25Row, panZoomMap, "pm25");
       
+      // Highlight the locations
+      highlightingLocations(summaryPm25Data, highlightedLocation, selectedLocation1, selectedLocation2);
+
       noStroke();
-      fill(summaryData.lerpColor);
+      fill(summaryPm25Data.lerpColor);
       ellipseMode(RADIUS);
-      circle(summaryData.screenX, summaryData.screenY, summaryData.radius);
+      circle(summaryPm25Data.screenX, summaryPm25Data.screenY, summaryPm25Data.radius);
     }
+
+    // Draw the average wind data on the summary map
+    for (TableRow summaryWindRow : summaryWind.summaryTable.rows()) {
+      DataManipulation summaryWindData = new DataManipulation(summaryWindRow, panZoomMap, "wind");
+      
+      pushMatrix();
+      translate(summaryWindData.screenX, summaryWindData.screenY); // Translate to the center of the location
+      rotate(radians(summaryWindData.windDirection - 180));
+      rectMode(CORNERS);
+      noStroke();
+      fill(30, 144, 255); // Dodgerblue
+      rect(-1, 7, 1, -7);
+
+      pushMatrix();
+      translate(0, 7); // Translate to the top of the rectangle
+      rotate(frameCount * summaryWindData.rotationSpeed);
+      noStroke();
+      fill(0, 191, 255); // Deepskyblue
+      star(0, 0, 3, 7, 5);
+      popMatrix();
+
+      popMatrix();
+    }
+
     if (status == true) {
       count += 1;
     }

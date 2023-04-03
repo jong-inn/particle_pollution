@@ -79,12 +79,6 @@ class DataBuckets{
       TableRow summaryRow = summaryTable.findRow(cityName[i], "Local Site Name"); // find the row containing the specific Local Site Name
       summaryRow.setFloat("PM25 Average", pm25AvgValue[i]); // put the average into the PM25 Average column
     }
-
-    // put averages into the average column
-    for (int i=0; i<cityName.length; i++) {
-      TableRow summaryRow = summaryTable.findRow(cityName[i], "Local Site Name"); // find the row containing the specific Local Site Name
-      summaryRow.setFloat("PM25 Average", avgValue[i]); // put the average into the PM25 Average column
-    }
   }
   
   void windCalcAvg(){
