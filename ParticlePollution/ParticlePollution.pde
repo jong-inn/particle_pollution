@@ -43,9 +43,9 @@ void setup() {
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
   
-  summary = new DataBuckets(locationTable, pm25Table, startDate, endDate);
-  top5Name = summary.topName(5);
-  top5Value = summary.topValue(5);
+  summary = new DataBuckets("pm25", locationTable, pm25Table, startDate, endDate);
+  top5Name = summary.pm25TopName(5);
+  top5Value = summary.pm25TopValue(5);
 }
 
 void draw() {
@@ -160,6 +160,30 @@ void draw() {
       ellipseMode(RADIUS);
       circle(pm25Data.screenX, pm25Data.screenY, pm25Data.radius);
 
+    }
+
+    if (windStatus == true) {
+      for (TableRow windRow : windTable.findRows(stringDate, "Date Local")) {
+        DataManipulation windData = new DataManipulation(windRow, panZoomMap, "wind");
+
+        pushMatrix();
+        translate(windData.screenX, windData.screenY); // Translate to the center of the location
+        rotate(radians(windData.windDirection - 180));
+        rectMode(CORNERS);
+        noStroke();
+        fill(30, 144, 255); // Dodgerblue
+        rect(-1, 7, 1, -7);
+
+        pushMatrix();
+        translate(0, 7); // Translate to the top of the rectangle
+        rotate(frameCount * windData.rotationSpeed);
+        noStroke();
+        fill(0, 191, 255); // Deepskyblue
+        star(0, 0, 3, 7, 5);
+        popMatrix();
+
+        popMatrix();
+      }
     }
 
     if (windStatus == true) {
