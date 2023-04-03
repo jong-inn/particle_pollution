@@ -70,8 +70,16 @@ class DataManipulation {
         this.longitude = row.getFloat("Longitude");
         this.screenX = panZoomMap.longitudeToScreenX(longitude);
         this.screenY = panZoomMap.latitudeToScreenY(latitude);
-        this.windDirection = row.getFloat("Arithmetic Mean Direction");
-        this.windSpeed = row.getFloat("Arithmetic Mean Speed");
+        try {
+            this.windDirection = row.getFloat("Arithmetic Mean Direction");
+        } catch (Exception e) {
+            this.windDirection = row.getFloat("Wind Direction Average");
+        }
+        try {
+            this.windSpeed = row.getFloat("Arithmetic Mean Speed");
+        } catch (Exception e) {
+            this.windSpeed = row.getFloat("Wind Value Average");
+        }
         if (windSpeed < minWindSpeed) {
             this.windSpeedNormalized = 0.0;
         } else if (windSpeed > maxWindSpeed) {
