@@ -11,6 +11,18 @@ Table windTable;
 Table locationTable;
 PImage map;
 
+Table mantecaPm25Table;
+Table mantecaWindTable;
+Table modestoPm25Table;
+Table modestoWindTable;
+
+float[] data1; 
+float[] data2;
+LineGraph drawLine;
+int lineDataNum;
+float maxY;
+int graphCount = 0;
+
 LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 int speed = 200;
@@ -23,6 +35,14 @@ boolean windStatus = true; // Option for showing the wind data
 String highlightedLocation = "";
 String selectedLocation1 = "";
 String selectedLocation2 = "";
+
+float[] location1Pm25 = new float[11];
+float[] location1WindSpeed = new float[11];
+float[] location1WindDirection = new float[11];
+float[] location2Pm25 = new float[11];
+float[] location2WindSpeed = new float[11];
+float[] location2WindDirection = new float[11];
+String[] arrayStringDate = new String[11];
 
 String [] top5Name; // summary
 float [] top5Value; // summary
@@ -41,6 +61,26 @@ void setup() {
   // Load tables
   loadRawDataTables();
 
+  // Temporal tables for testing
+  mantecaPm25Table = loadTable("manteca_pm25_test.csv", "header");
+  mantecaWindTable = loadTable("manteca_wind_test.csv", "header");
+  modestoPm25Table = loadTable("modesto_pm25_test.csv", "header");
+  modestoWindTable = loadTable("modesto_wind_test.csv", "header");
+  for (int i=0; i<mantecaPm25Table.getRowCount(); i++) {
+    location1Pm25[i] = mantecaPm25Table.getRow(i).getFloat("Arithmetic Mean");
+    location1WindSpeed[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
+    location1WindDirection[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+
+    location2Pm25[i] = modestoPm25Table.getRow(i).getFloat("Arithmetic Mean");
+    location2WindSpeed[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
+    location2WindDirection[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+
+    arrayStringDate[i] = mantecaPm25Table.getRow(i).getString("Date Local").replace("2020-", "");
+  }
+
+  data1 = Arrays.copyOf(location1Pm25, location1Pm25.length);
+  data2 = Arrays.copyOf(location2Pm25, location2Pm25.length);
+
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
   
@@ -49,6 +89,21 @@ void setup() {
   top5Value = summaryPm25.pm25TopValue(5);
 
   summaryWind = new DataBuckets("wind", locationTable, windTable, startDate, endDate);
+
+  // Line Graph
+  lineDataNum = 0;
+  if (data1 == null && data2 == null){
+    println("empty"); 
+  }else if ( data2 != null){
+    if (max(data1) > max(data2)){
+      maxY = max(data1);
+    } else {
+      maxY = max(data2);
+    }
+  }else{
+    maxY = max(data1);
+  }
+
 }
 
 void draw() {
@@ -58,6 +113,10 @@ void draw() {
   // Get highlighted location
   highlightedLocation = getLocationUnderMouse(locationTable, panZoomMap);
   // println("Highlighted Location: "+highlightedLocation);
+
+  // Prepare arrays for selected locations
+  // if (selectedLocation1 != "") {
+   
 
   // Draw the bounds of the map
   fill(250);
@@ -72,6 +131,12 @@ void draw() {
   // Draw the California map
   imageMode(CORNERS);
   image(map, mapX1, mapY1, mapX2, mapY2);
+
+  fill(0);
+  textSize(20);
+  textAlign(LEFT, CENTER);
+  text("From: "+startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 50, 70);
+  text("To  : "+endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 50, 100);
 
   // Draw the play/stop status
   //if (status == true) {
@@ -131,6 +196,11 @@ void draw() {
   pushMatrix();
 
   if (count == 0) {
+    fill(0);
+    textSize(25);
+    textAlign(LEFT, CENTER);
+    text("Average Overview", 50, 30);
+
     // Draw the average PM25 data on the summary map
     for (TableRow summaryPm25Row : summaryPm25.summaryTable.rows()) {
       DataManipulation summaryPm25Data = new DataManipulation(summaryPm25Row, panZoomMap, "pm25");
@@ -279,6 +349,87 @@ void draw() {
     text(top5Name[top5]+": "+top5Value[top5], 1140, 60+(top5*50)-10);
   }
 
+  // daily line graph
+  fill(0);
+  textSize(20);
+  textAlign(LEFT, CENTER);
+  text("Daily Data for Selected Cities", 1120, 360);
+  fill(0);
+  textSize(15);
+  text("Pivot Location (Color Black): "+selectedLocation1,1140, 395); 
+  text("Comparing Location (Color Blue): "+selectedLocation2,1140, 415); 
+  line(1130, 390, 1130, 850);
+  line(1130, 850, 1550, 850);
+  
+  if (status == true) {
+    // Line Graph
+    if (data1 == null && data2 == null){
+      println("empty");
+    }else if (lineDataNum == data1.length){
+      // show the last graph
+      // int[] number = new int[lineDataNum+1];
+      // for (int pos=0; pos < lineDataNum+1; pos++){
+      //     number[pos] = pos+1;    
+      //   }
+      if (data1 != null){
+        float[] temp1 = Arrays.copyOfRange(data1, data1.length-4, data1.length);
+        color c1 = color(0,0,0);
+        // drawLine = new LineGraph(temp1, number, maxY, c1);
+        drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
+        drawLine.drawinging();
+      }
+      if (data2 != null){
+        float[] temp2 = Arrays.copyOfRange(data2, data1.length-4, data1.length);
+        color c2 = color(50,60,200);
+        // drawLine = new LineGraph(temp2, number, maxY, c2);
+        drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
+        drawLine.drawinging();
+      }
+      println("end");
+    }else if (lineDataNum < 4){
+      //for the first four data
+      // int[] number = new int[lineDataNum+1];
+      // for (int pos=0; pos < lineDataNum+1; pos++){
+      //     number[pos] = pos+1;    
+      //   }
+      if (data1 != null){
+        float[] temp1 = Arrays.copyOf(data1, lineDataNum+1);
+        color c1 = color(0,0,0);
+        // drawLine = new LineGraph(temp1, number, maxY, c1);
+        drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
+        drawLine.drawinging();
+      }
+      if (data2 != null){
+        float[] temp2 = Arrays.copyOf(data2, lineDataNum+1);
+        color c2 = color(50,60,200);
+        // drawLine = new LineGraph(temp2, number, maxY, c2);
+        drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
+        drawLine.drawinging();
+      }
+      lineDataNum++;
+    }else{
+      // for the latest four
+      // int[] number = new int[lineDataNum+1];
+      // for (int pos=0; pos < lineDataNum+1; pos++){
+      //     number[pos] = pos+1;    
+      // }
+      if (data1 != null){
+        float[] temp1 = Arrays.copyOfRange(data1, lineDataNum-3, lineDataNum+1);
+        color c1 = color(0,0,0);
+        // drawLine = new LineGraph(temp1, number, maxY, c1);
+        drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
+        drawLine.drawinging();
+      }
+      if (data2 != null){
+        float[] temp2 = Arrays.copyOfRange(data2, lineDataNum-3, lineDataNum+1);
+        color c2 = color(50,60,200);
+        // drawLine = new LineGraph(temp2, number, maxY, c2);
+        drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
+        drawLine.drawinging();
+      }
+      lineDataNum++;
+    }
+  }
 }
 
 void keyPressed() {
@@ -293,6 +444,8 @@ void keyPressed() {
       status = true;
       println("play");
     }
+  } else if (key == DELETE || key == BACKSPACE) {
+    graphCount += 1;
   }
 }
 
