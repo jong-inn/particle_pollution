@@ -9,6 +9,7 @@ class DataManipulation {
     float windDirection;
     float radius;
     color lerpColor;
+    String date;
 
     float minPm25 = 0.0;
     float maxPm25 = 20.0;
@@ -46,6 +47,11 @@ class DataManipulation {
         this.localSiteName = row.getString("Local Site Name");
         this.latitude = row.getFloat("Latitude");
         this.longitude = row.getFloat("Longitude");
+        try {
+            this.date = row.getString("Date Local");
+        } catch (Exception e) {
+            this.date = "";
+        }
         this.screenX = panZoomMap.longitudeToScreenX(longitude);
         this.screenY = panZoomMap.latitudeToScreenY(latitude);
         try {
@@ -55,6 +61,7 @@ class DataManipulation {
         }
         if (pm25 < minPm25) {
             this.pm25Normalized = 0.0;
+            this.pm25 = minPm25;
         } else if (pm25 > maxPm25) {
             this.pm25Normalized = 1.0;
         } else {
@@ -68,6 +75,11 @@ class DataManipulation {
         this.localSiteName = row.getString("Local Site Name");
         this.latitude = row.getFloat("Latitude");
         this.longitude = row.getFloat("Longitude");
+        try {
+            this.date = row.getString("Date Local");
+        } catch (Exception e) {
+            this.date = "";
+        }
         this.screenX = panZoomMap.longitudeToScreenX(longitude);
         this.screenY = panZoomMap.latitudeToScreenY(latitude);
         try {
@@ -82,6 +94,7 @@ class DataManipulation {
         }
         if (windSpeed < minWindSpeed) {
             this.windSpeedNormalized = 0.0;
+            this.windSpeed = minWindSpeed;
         } else if (windSpeed > maxWindSpeed) {
             this.windSpeedNormalized = 1.0;
         } else {

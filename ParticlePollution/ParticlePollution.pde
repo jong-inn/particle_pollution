@@ -11,21 +11,22 @@ Table windTable;
 Table locationTable;
 PImage map;
 
-Table mantecaPm25Table;
-Table mantecaWindTable;
-Table modestoPm25Table;
-Table modestoWindTable;
+// Table mantecaPm25Table;
+// Table mantecaWindTable;
+// Table modestoPm25Table;
+// Table modestoWindTable;
 
-float[] data1; 
-float[] data2;
-int lineDataNum;
+// float[] data1; 
+// float[] data2;
+// int lineDataNum;
 float maxY;
-int graphCount = 0;
+// int graphCount = 0;
 
 LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 float speed = 50;
-float period = Period.between(startDate, endDate).getDays() * speed;
+int totalDays = Period.between(startDate, endDate).getDays() + 1;
+float period = (totalDays-1) * speed;
 int day = -1;
 float count = 0;
 boolean status = false; // Paused in the beginning
@@ -37,13 +38,13 @@ color colorForSelectedLocation1 = color(255, 174, 66); // Yellow Orange
 String selectedLocation2 = "";
 color colorForSelectedLocation2 = color(0, 57, 153); // Medium Dark Shade of Cyan Blue
 
-float[] location1Pm25 = new float[11];
-float[] location1WindSpeed = new float[11];
-float[] location1WindDirection = new float[11];
-float[] location2Pm25 = new float[11];
-float[] location2WindSpeed = new float[11];
-float[] location2WindDirection = new float[11];
-String[] arrayStringDate = new String[11];
+// float[] location1Pm25 = new float[11];
+// float[] location1WindSpeed = new float[11];
+// float[] location1WindDirection = new float[11];
+// float[] location2Pm25 = new float[11];
+// float[] location2WindSpeed = new float[11];
+// float[] location2WindDirection = new float[11];
+// String[] arrayStringDate = new String[11];
 
 String [] top5Name; // summary
 float [] top5Value; // summary
@@ -60,9 +61,20 @@ float yGraphZeroPoint = 850;
 float graphHeight = 410;
 float graphWidth = 430;
 
+// Info Graph - Input Variables (with initialization)
+float[] pm25InfoLocation1 = new float[totalDays];
+float[] pm25InfoLocation2 = new float[totalDays]; 
+float[] windSpeedInfoLocation1 = new float[totalDays];
+float[] windSpeedInfoLocation2 = new float[totalDays];
+float[] windDirectionInfoLocation1 = new float[totalDays];
+float[] windDirectionInfoLocation2 = new float[totalDays];
+String[] arrayStringDate = new String[totalDays];
+
 void setup() {
   // Size of the graphics window
   size(1600,900);
+
+  println("Total Days: "+totalDays);
 
   // Load a California map
   map = loadImage("california_simple_map.png");
@@ -70,25 +82,25 @@ void setup() {
   // Load tables
   loadRawDataTables();
 
-  // Temporal tables for testing
-  mantecaPm25Table = loadTable("manteca_pm25_test.csv", "header");
-  mantecaWindTable = loadTable("manteca_wind_test.csv", "header");
-  modestoPm25Table = loadTable("modesto_pm25_test.csv", "header");
-  modestoWindTable = loadTable("modesto_wind_test.csv", "header");
-  for (int i=0; i<mantecaPm25Table.getRowCount(); i++) {
-    location1Pm25[i] = mantecaPm25Table.getRow(i).getFloat("Arithmetic Mean");
-    location1WindSpeed[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
-    location1WindDirection[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
+  // // Temporal tables for testing
+  // mantecaPm25Table = loadTable("manteca_pm25_test.csv", "header");
+  // mantecaWindTable = loadTable("manteca_wind_test.csv", "header");
+  // modestoPm25Table = loadTable("modesto_pm25_test.csv", "header");
+  // modestoWindTable = loadTable("modesto_wind_test.csv", "header");
+  // for (int i=0; i<mantecaPm25Table.getRowCount(); i++) {
+  //   location1Pm25[i] = mantecaPm25Table.getRow(i).getFloat("Arithmetic Mean");
+  //   location1WindSpeed[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+  //   location1WindDirection[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
 
-    location2Pm25[i] = modestoPm25Table.getRow(i).getFloat("Arithmetic Mean");
-    location2WindSpeed[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
-    location2WindDirection[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
+  //   location2Pm25[i] = modestoPm25Table.getRow(i).getFloat("Arithmetic Mean");
+  //   location2WindSpeed[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+  //   location2WindDirection[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
 
-    arrayStringDate[i] = mantecaPm25Table.getRow(i).getString("Date Local").replace("2020-", "");
-  }
+  //   arrayStringDate[i] = mantecaPm25Table.getRow(i).getString("Date Local").replace("2020-", "");
+  // }
 
-  data1 = Arrays.copyOf(location1Pm25, location1Pm25.length);
-  data2 = Arrays.copyOf(location2Pm25, location2Pm25.length);
+  // data1 = Arrays.copyOf(location1Pm25, location1Pm25.length);
+  // data2 = Arrays.copyOf(location2Pm25, location2Pm25.length);
 
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
@@ -99,19 +111,32 @@ void setup() {
 
   summaryWind = new DataBuckets("wind", locationTable, windTable, startDate, endDate);
 
-  // Line Graph
-  lineDataNum = 0;
-  if (data1 == null && data2 == null){
-    println("empty"); 
-  }else if ( data2 != null){
-    if (max(data1) > max(data2)){
-      maxY = max(data1);
-    } else {
-      maxY = max(data2);
-    }
-  }else{
-    maxY = max(data1);
+  // Info Graph
+  Arrays.fill(pm25InfoLocation1,-1);
+  Arrays.fill(pm25InfoLocation2,-1);
+  Arrays.fill(windSpeedInfoLocation1,-1);
+  Arrays.fill(windSpeedInfoLocation2,-1);
+  Arrays.fill(windDirectionInfoLocation1,-1);
+  Arrays.fill(windDirectionInfoLocation2,-1);
+
+  for (int countDay = 0; countDay < (totalDays); countDay++){
+    String stringDate = startDate.plusDays(countDay).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    arrayStringDate[countDay] = stringDate.replace("2020-", "");
   }
+
+  // Line Graph
+  // lineDataNum = 0;
+  // if (data1 == null && data2 == null){
+  //   println("empty"); 
+  // }else if ( data2 != null){
+  //   if (max(data1) > max(data2)){
+  //     maxY = max(data1);
+  //   } else {
+  //     maxY = max(data2);
+  //   }
+  // }else{
+  //   maxY = max(data1);
+  // }
 
   // Scroll bar
   hScrollbar = new HScrollbar(100, height-50, 900, 16, 1, arrayStringDate, speed);
@@ -301,43 +326,43 @@ void draw() {
       }
     }
 
-    if (windStatus == true) {
-      for (TableRow windRow : windTable.findRows(stringDate, "Date Local")) {
-        DataManipulation windData = new DataManipulation(windRow, panZoomMap, "wind");
+    // if (windStatus == true) {
+    //   for (TableRow windRow : windTable.findRows(stringDate, "Date Local")) {
+    //     DataManipulation windData = new DataManipulation(windRow, panZoomMap, "wind");
 
-        pushMatrix();
-        translate(windData.screenX, windData.screenY); // Translate to the center of the location
-        rotate(radians(windData.windDirection - 180));
-        rectMode(CORNERS);
-        noStroke();
-        fill(30, 144, 255); // Dodgerblue
-        rect(-1, 7, 1, -7);
+    //     pushMatrix();
+    //     translate(windData.screenX, windData.screenY); // Translate to the center of the location
+    //     rotate(radians(windData.windDirection - 180));
+    //     rectMode(CORNERS);
+    //     noStroke();
+    //     fill(30, 144, 255); // Dodgerblue
+    //     rect(-1, 7, 1, -7);
 
-        pushMatrix();
-        translate(0, 7); // Translate to the top of the rectangle
-        rotate(frameCount * windData.rotationSpeed);
-        noStroke();
-        fill(0, 191, 255); // Deepskyblue
-        star(0, 0, 3, 7, 5);
-        popMatrix();
+    //     pushMatrix();
+    //     translate(0, 7); // Translate to the top of the rectangle
+    //     rotate(frameCount * windData.rotationSpeed);
+    //     noStroke();
+    //     fill(0, 191, 255); // Deepskyblue
+    //     star(0, 0, 3, 7, 5);
+    //     popMatrix();
 
-        popMatrix();
-      }
-    }
+    //     popMatrix();
+    //   }
+    // }
 
     if (status == true) {
       count += 1;
     }
   }
 
-  println("Count: "+count);
+  // println("Count: "+count);
   // println()
-  hScrollbar.update(count);
-  hScrollbar.display();
-  if (hScrollbar.count != count) {
-    count = hScrollbar.count;
-    day = (int) count / (int) speed;
-  }
+  // hScrollbar.update(count);
+  // hScrollbar.display();
+  // if (hScrollbar.count != count) {
+  //   count = hScrollbar.count;
+  //   day = (int) count / (int) speed;
+  // }
 
 
   // Restore the first coordination
@@ -373,6 +398,56 @@ void draw() {
     text(top5Name[top5]+": "+top5Value[top5], 1140, 60+(top5*50)-10);
   }
 
+  // Info Graph - PM25 Input
+  if (selectedLocation1 != ""){
+    for (TableRow loc1 : pm25Table.findRows(selectedLocation1, "Local Site Name")){
+      DataManipulation selectedPM = new DataManipulation(loc1, panZoomMap, "pm25");
+      for (int countDay = 0; countDay < (totalDays); countDay++){
+        String stringDate = startDate.plusDays(countDay).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (selectedPM.date.equals(stringDate)){
+          pm25InfoLocation1[countDay] = selectedPM.pm25;
+        }
+      }
+    }
+  }
+   if (selectedLocation2 != ""){
+    for (TableRow loc2 : pm25Table.findRows(selectedLocation2, "Local Site Name")){
+      DataManipulation selectedPM = new DataManipulation(loc2, panZoomMap, "pm25");
+      for (int countDay = 0; countDay < (totalDays); countDay++){
+        String stringDate = startDate.plusDays(countDay).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (selectedPM.date.equals(stringDate)){
+          pm25InfoLocation2[countDay] = selectedPM.pm25;
+        }
+      }
+    }
+  }
+  
+  // Info Graph - wind Input
+  if (selectedLocation1 != ""){
+    for (TableRow loc1 : windTable.findRows(selectedLocation1, "Local Site Name")){
+      DataManipulation selectedWind = new DataManipulation(loc1, panZoomMap, "wind");
+      for (int countDay = 0; countDay < (totalDays); countDay++){
+        String stringDate = startDate.plusDays(countDay).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (selectedWind.date.equals(stringDate)){
+          windSpeedInfoLocation1[countDay] = selectedWind.windSpeed;
+          windDirectionInfoLocation1[countDay] = selectedWind.windDirection;
+        }   
+      }
+    }
+  }
+  if (selectedLocation2 != ""){
+    for (TableRow loc2 : windTable.findRows(selectedLocation2, "Local Site Name")){
+      DataManipulation selectedWind = new DataManipulation(loc2, panZoomMap, "wind");
+      for (int countDay = 0; countDay < (totalDays); countDay++){
+        String stringDate = startDate.plusDays(countDay).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (selectedWind.date.equals(stringDate)){
+          windSpeedInfoLocation2[countDay] = selectedWind.windSpeed;
+          windDirectionInfoLocation2[countDay] = selectedWind.windDirection;
+        }   
+      }
+    }
+  }
+
   // daily line graph
   fill(0);
   textSize(20);
@@ -393,13 +468,24 @@ void draw() {
 
   line(xGraphZeroPoint, yGraphZeroPoint-graphHeight, xGraphZeroPoint, yGraphZeroPoint); // y axis
   line(xGraphZeroPoint, yGraphZeroPoint, xGraphZeroPoint+graphWidth, yGraphZeroPoint); // x axis
-  maxY = max(max(data1), max(data2));
+
+  if (selectedLocation1 == "" && selectedLocation2 == ""){
+    maxY = 0;
+  } else if (selectedLocation2 == ""){
+    maxY = max(pm25InfoLocation1);
+  } else if (selectedLocation1 == ""){
+    maxY = max(pm25InfoLocation2);
+  }else{
+    maxY = max(max(pm25InfoLocation1), max(pm25InfoLocation2));
+  }
+
+  
 
   if (selectedLocation1 != "" && count != 0) {
     DailyGraph dailyGraph1 = new DailyGraph(
-      data1, 
-      location1WindSpeed, 
-      location1WindDirection, 
+      pm25InfoLocation1, 
+      windSpeedInfoLocation1, 
+      windDirectionInfoLocation1, 
       arrayStringDate, 
       maxY, 
       colorForSelectedLocation1, 
@@ -412,9 +498,9 @@ void draw() {
 
   if (selectedLocation2 != "" && count != 0) {
     DailyGraph dailyGraph2 = new DailyGraph(
-      data2, 
-      location2WindSpeed,
-      location2WindDirection,
+      pm25InfoLocation2, 
+      windSpeedInfoLocation2,
+      windDirectionInfoLocation2,
       arrayStringDate, 
       maxY, 
       colorForSelectedLocation2, 
@@ -424,80 +510,6 @@ void draw() {
     );
     dailyGraph2.drawGraph();
   }
-
-  // if (data1 == null && data2 == null) {
-  //   println("empty");
-  // } 
-
-  // if (status == true) {
-  //   // Line Graph
-  //   if (data1 == null && data2 == null){
-  //     println("empty");
-  //   }else if (lineDataNum == data1.length){
-  //     // show the last graph
-  //     // int[] number = new int[lineDataNum+1];
-  //     // for (int pos=0; pos < lineDataNum+1; pos++){
-  //     //     number[pos] = pos+1;    
-  //     //   }
-  //     if (data1 != null){
-  //       float[] temp1 = Arrays.copyOfRange(data1, data1.length-4, data1.length);
-  //       color c1 = color(0,0,0);
-  //       // drawLine = new LineGraph(temp1, number, maxY, c1);
-  //       drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
-  //       drawLine.drawinging();
-  //     }
-  //     if (data2 != null){
-  //       float[] temp2 = Arrays.copyOfRange(data2, data1.length-4, data1.length);
-  //       color c2 = color(50,60,200);
-  //       // drawLine = new LineGraph(temp2, number, maxY, c2);
-  //       drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
-  //       drawLine.drawinging();
-  //     }
-  //     println("end");
-  //   }else if (lineDataNum < 4){
-  //     //for the first four data
-  //     // int[] number = new int[lineDataNum+1];
-  //     // for (int pos=0; pos < lineDataNum+1; pos++){
-  //     //     number[pos] = pos+1;    
-  //     //   }
-  //     if (data1 != null){
-  //       float[] temp1 = Arrays.copyOf(data1, lineDataNum+1);
-  //       color c1 = color(0,0,0);
-  //       // drawLine = new LineGraph(temp1, number, maxY, c1);
-  //       drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
-  //       drawLine.drawinging();
-  //     }
-  //     if (data2 != null){
-  //       float[] temp2 = Arrays.copyOf(data2, lineDataNum+1);
-  //       color c2 = color(50,60,200);
-  //       // drawLine = new LineGraph(temp2, number, maxY, c2);
-  //       drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
-  //       drawLine.drawinging();
-  //     }
-  //     lineDataNum++;
-  //   }else{
-  //     // for the latest four
-  //     // int[] number = new int[lineDataNum+1];
-  //     // for (int pos=0; pos < lineDataNum+1; pos++){
-  //     //     number[pos] = pos+1;    
-  //     // }
-  //     if (data1 != null){
-  //       float[] temp1 = Arrays.copyOfRange(data1, lineDataNum-3, lineDataNum+1);
-  //       color c1 = color(0,0,0);
-  //       // drawLine = new LineGraph(temp1, number, maxY, c1);
-  //       drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
-  //       drawLine.drawinging();
-  //     }
-  //     if (data2 != null){
-  //       float[] temp2 = Arrays.copyOfRange(data2, lineDataNum-3, lineDataNum+1);
-  //       color c2 = color(50,60,200);
-  //       // drawLine = new LineGraph(temp2, number, maxY, c2);
-  //       drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
-  //       drawLine.drawinging();
-  //     }
-  //     lineDataNum++;
-  //   }
-  // }
 }
 
 void keyPressed() {
@@ -512,8 +524,6 @@ void keyPressed() {
       status = true;
       println("play");
     }
-  } else if (key == DELETE || key == BACKSPACE) {
-    graphCount += 1;
   }
 }
 

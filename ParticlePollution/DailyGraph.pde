@@ -109,11 +109,19 @@ class DailyGraph {
       float prevY = 0;
       for (int i=0; i<dayCount+1; i++) {
         // Set the x, y positions
-        float x = xGraphZeroPoint + (i+1)*graphWidth/11;
-        float y = yLineGraphZeroPoint - pm25Array[i]/maxY*yLineGraphHeight;
+        float x, y;
+        if (pm25Array[i] >= 0) {
+          x = xGraphZeroPoint + (i+1)*graphWidth/11;
+          y = yLineGraphZeroPoint - pm25Array[i]/maxY*yLineGraphHeight;
         
-        // Draw the points
-        drawPoints(x, y, pm25Array[i]);
+          // Draw the points
+          drawPoints(x, y, pm25Array[i]);
+        } else {
+          x = 0;
+          y = 0;
+          prevX = 0;
+          prevY = 0;
+        }
 
         // Draw the lines between points
         if (dayCount+1 > 1) {
@@ -145,13 +153,21 @@ class DailyGraph {
       float prevX = 0;
       float prevY = 0;
       int j = 1; // For x axis
-      for (int i=pm25Array.length-10; i<dayCount+1; i++) {
+      for (int i=dayCount-maxDayCount+1; i<dayCount+1; i++) {
         // Set the x, y positions
-        float x = xGraphZeroPoint + j*graphWidth/11;
-        float y = yLineGraphZeroPoint - pm25Array[i]/maxY*yLineGraphHeight;
+        float x, y;
+        if (pm25Array[i] >= 0) {
+          x = xGraphZeroPoint + j*graphWidth/11;
+          y = yLineGraphZeroPoint - pm25Array[i]/maxY*yLineGraphHeight;
 
-        // Draw the points
-        drawPoints(x, y, pm25Array[i]);
+          // Draw the points
+          drawPoints(x, y, pm25Array[i]);
+        } else {
+          x = 0;
+          y = 0;
+          prevX = 0;
+          prevY = 0;
+        }
 
         // Draw the lines between points
         if (dayCount+1 > 1) {
