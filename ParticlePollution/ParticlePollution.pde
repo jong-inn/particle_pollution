@@ -18,23 +18,24 @@ Table modestoWindTable;
 
 float[] data1; 
 float[] data2;
-LineGraph drawLine;
 int lineDataNum;
 float maxY;
 int graphCount = 0;
 
 LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
-int speed = 200;
-int period = Period.between(startDate, endDate).getDays() * speed;
-int day = 0;
-int count = 0;
+float speed = 50;
+float period = Period.between(startDate, endDate).getDays() * speed;
+int day = -1;
+float count = 0;
 boolean status = false; // Paused in the beginning
 boolean windStatus = true; // Option for showing the wind data
 
 String highlightedLocation = "";
 String selectedLocation1 = "";
+color colorForSelectedLocation1 = color(255, 174, 66); // Yellow Orange
 String selectedLocation2 = "";
+color colorForSelectedLocation2 = color(0, 57, 153); // Medium Dark Shade of Cyan Blue
 
 float[] location1Pm25 = new float[11];
 float[] location1WindSpeed = new float[11];
@@ -50,6 +51,14 @@ float [] top5Value; // summary
 PanZoomMap panZoomMap;
 DataBuckets summaryPm25;
 DataBuckets summaryWind;
+
+HScrollbar hScrollbar;
+
+// Graph variables
+float xGraphZeroPoint = 1140;
+float yGraphZeroPoint = 850;
+float graphHeight = 410;
+float graphWidth = 430;
 
 void setup() {
   // Size of the graphics window
@@ -68,12 +77,12 @@ void setup() {
   modestoWindTable = loadTable("modesto_wind_test.csv", "header");
   for (int i=0; i<mantecaPm25Table.getRowCount(); i++) {
     location1Pm25[i] = mantecaPm25Table.getRow(i).getFloat("Arithmetic Mean");
-    location1WindSpeed[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
-    location1WindDirection[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+    location1WindSpeed[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+    location1WindDirection[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
 
     location2Pm25[i] = modestoPm25Table.getRow(i).getFloat("Arithmetic Mean");
-    location2WindSpeed[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
-    location2WindDirection[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+    location2WindSpeed[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
+    location2WindDirection[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
 
     arrayStringDate[i] = mantecaPm25Table.getRow(i).getString("Date Local").replace("2020-", "");
   }
@@ -104,6 +113,8 @@ void setup() {
     maxY = max(data1);
   }
 
+  // Scroll bar
+  hScrollbar = new HScrollbar(100, height-50, 900, 16, 1, arrayStringDate, speed);
 }
 
 void draw() {
@@ -243,6 +254,9 @@ void draw() {
   } else if (count != 0) {
     if (count % speed == 0 && status == true && day < (period / speed)) {
       day += 1;
+      println("Day: "+day);
+      String stringDate2 = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+      println("Date: "+stringDate2);
     }
     String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     textSize(30);
@@ -316,6 +330,16 @@ void draw() {
     }
   }
 
+  println("Count: "+count);
+  // println()
+  hScrollbar.update(count);
+  hScrollbar.display();
+  if (hScrollbar.count != count) {
+    count = hScrollbar.count;
+    day = (int) count / (int) speed;
+  }
+
+
   // Restore the first coordination
   popMatrix();
   
@@ -354,82 +378,126 @@ void draw() {
   textSize(20);
   textAlign(LEFT, CENTER);
   text("Daily Data for Selected Cities", 1120, 360);
-  fill(0);
   textSize(15);
-  text("Pivot Location (Color Black): "+selectedLocation1,1140, 395); 
-  text("Comparing Location (Color Blue): "+selectedLocation2,1140, 415); 
-  line(1130, 390, 1130, 850);
-  line(1130, 850, 1550, 850);
+  text("Pivot Location", 1140, 395);
+  text("Comparing Location",1140, 415);
+
+  fill(colorForSelectedLocation1);
+  text("(Color Yellow)", 1232, 395);
+  fill(colorForSelectedLocation2);
+  text("(Color Blue)", 1270, 415);
   
-  if (status == true) {
-    // Line Graph
-    if (data1 == null && data2 == null){
-      println("empty");
-    }else if (lineDataNum == data1.length){
-      // show the last graph
-      // int[] number = new int[lineDataNum+1];
-      // for (int pos=0; pos < lineDataNum+1; pos++){
-      //     number[pos] = pos+1;    
-      //   }
-      if (data1 != null){
-        float[] temp1 = Arrays.copyOfRange(data1, data1.length-4, data1.length);
-        color c1 = color(0,0,0);
-        // drawLine = new LineGraph(temp1, number, maxY, c1);
-        drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
-        drawLine.drawinging();
-      }
-      if (data2 != null){
-        float[] temp2 = Arrays.copyOfRange(data2, data1.length-4, data1.length);
-        color c2 = color(50,60,200);
-        // drawLine = new LineGraph(temp2, number, maxY, c2);
-        drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
-        drawLine.drawinging();
-      }
-      println("end");
-    }else if (lineDataNum < 4){
-      //for the first four data
-      // int[] number = new int[lineDataNum+1];
-      // for (int pos=0; pos < lineDataNum+1; pos++){
-      //     number[pos] = pos+1;    
-      //   }
-      if (data1 != null){
-        float[] temp1 = Arrays.copyOf(data1, lineDataNum+1);
-        color c1 = color(0,0,0);
-        // drawLine = new LineGraph(temp1, number, maxY, c1);
-        drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
-        drawLine.drawinging();
-      }
-      if (data2 != null){
-        float[] temp2 = Arrays.copyOf(data2, lineDataNum+1);
-        color c2 = color(50,60,200);
-        // drawLine = new LineGraph(temp2, number, maxY, c2);
-        drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
-        drawLine.drawinging();
-      }
-      lineDataNum++;
-    }else{
-      // for the latest four
-      // int[] number = new int[lineDataNum+1];
-      // for (int pos=0; pos < lineDataNum+1; pos++){
-      //     number[pos] = pos+1;    
-      // }
-      if (data1 != null){
-        float[] temp1 = Arrays.copyOfRange(data1, lineDataNum-3, lineDataNum+1);
-        color c1 = color(0,0,0);
-        // drawLine = new LineGraph(temp1, number, maxY, c1);
-        drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
-        drawLine.drawinging();
-      }
-      if (data2 != null){
-        float[] temp2 = Arrays.copyOfRange(data2, lineDataNum-3, lineDataNum+1);
-        color c2 = color(50,60,200);
-        // drawLine = new LineGraph(temp2, number, maxY, c2);
-        drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
-        drawLine.drawinging();
-      }
-      lineDataNum++;
-    }
+  fill(0);
+  text(": " + selectedLocation1, 1322, 395);
+  text(": " + selectedLocation2, 1348, 415);
+
+  line(xGraphZeroPoint, yGraphZeroPoint-graphHeight, xGraphZeroPoint, yGraphZeroPoint); // y axis
+  line(xGraphZeroPoint, yGraphZeroPoint, xGraphZeroPoint+graphWidth, yGraphZeroPoint); // x axis
+  maxY = max(max(data1), max(data2));
+
+  if (selectedLocation1 != "" && count != 0) {
+    DailyGraph dailyGraph1 = new DailyGraph(
+      data1, 
+      location1WindSpeed, 
+      location1WindDirection, 
+      arrayStringDate, 
+      maxY, 
+      colorForSelectedLocation1, 
+      day, 
+      -10, 
+      1
+    );
+    dailyGraph1.drawGraph();
   }
+
+  if (selectedLocation2 != "" && count != 0) {
+    DailyGraph dailyGraph2 = new DailyGraph(
+      data2, 
+      location2WindSpeed,
+      location2WindDirection,
+      arrayStringDate, 
+      maxY, 
+      colorForSelectedLocation2, 
+      day, 
+      10,
+      2
+    );
+    dailyGraph2.drawGraph();
+  }
+
+  // if (data1 == null && data2 == null) {
+  //   println("empty");
+  // } 
+
+  // if (status == true) {
+  //   // Line Graph
+  //   if (data1 == null && data2 == null){
+  //     println("empty");
+  //   }else if (lineDataNum == data1.length){
+  //     // show the last graph
+  //     // int[] number = new int[lineDataNum+1];
+  //     // for (int pos=0; pos < lineDataNum+1; pos++){
+  //     //     number[pos] = pos+1;    
+  //     //   }
+  //     if (data1 != null){
+  //       float[] temp1 = Arrays.copyOfRange(data1, data1.length-4, data1.length);
+  //       color c1 = color(0,0,0);
+  //       // drawLine = new LineGraph(temp1, number, maxY, c1);
+  //       drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
+  //       drawLine.drawinging();
+  //     }
+  //     if (data2 != null){
+  //       float[] temp2 = Arrays.copyOfRange(data2, data1.length-4, data1.length);
+  //       color c2 = color(50,60,200);
+  //       // drawLine = new LineGraph(temp2, number, maxY, c2);
+  //       drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
+  //       drawLine.drawinging();
+  //     }
+  //     println("end");
+  //   }else if (lineDataNum < 4){
+  //     //for the first four data
+  //     // int[] number = new int[lineDataNum+1];
+  //     // for (int pos=0; pos < lineDataNum+1; pos++){
+  //     //     number[pos] = pos+1;    
+  //     //   }
+  //     if (data1 != null){
+  //       float[] temp1 = Arrays.copyOf(data1, lineDataNum+1);
+  //       color c1 = color(0,0,0);
+  //       // drawLine = new LineGraph(temp1, number, maxY, c1);
+  //       drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
+  //       drawLine.drawinging();
+  //     }
+  //     if (data2 != null){
+  //       float[] temp2 = Arrays.copyOf(data2, lineDataNum+1);
+  //       color c2 = color(50,60,200);
+  //       // drawLine = new LineGraph(temp2, number, maxY, c2);
+  //       drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
+  //       drawLine.drawinging();
+  //     }
+  //     lineDataNum++;
+  //   }else{
+  //     // for the latest four
+  //     // int[] number = new int[lineDataNum+1];
+  //     // for (int pos=0; pos < lineDataNum+1; pos++){
+  //     //     number[pos] = pos+1;    
+  //     // }
+  //     if (data1 != null){
+  //       float[] temp1 = Arrays.copyOfRange(data1, lineDataNum-3, lineDataNum+1);
+  //       color c1 = color(0,0,0);
+  //       // drawLine = new LineGraph(temp1, number, maxY, c1);
+  //       drawLine = new LineGraph(temp1, arrayStringDate, maxY, c1, graphCount, -10);
+  //       drawLine.drawinging();
+  //     }
+  //     if (data2 != null){
+  //       float[] temp2 = Arrays.copyOfRange(data2, lineDataNum-3, lineDataNum+1);
+  //       color c2 = color(50,60,200);
+  //       // drawLine = new LineGraph(temp2, number, maxY, c2);
+  //       drawLine = new LineGraph(temp2, arrayStringDate, maxY, c2, graphCount, 10);
+  //       drawLine.drawinging();
+  //     }
+  //     lineDataNum++;
+  //   }
+  // }
 }
 
 void keyPressed() {
