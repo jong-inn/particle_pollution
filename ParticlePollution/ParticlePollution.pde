@@ -58,6 +58,14 @@ float[] windDirectionInfoLocation1 = new float[totalDays];
 float[] windDirectionInfoLocation2 = new float[totalDays];
 String[] arrayStringDate = new String[totalDays];
 
+// Legend Variables
+float legendLocX_1 = 0;
+float legendLocX_2 = 130;
+float legendLocX_middle = (legendLocX_1 + legendLocX_2)/2;
+float legendLocY_1 = 0;
+float legendLocY_2 = 500;
+float legendLocY_middle = (legendLocY_1 + legendLocY_2)/2;
+
 void setup() {
   // Size of the graphics window
   size(1600,900);
@@ -277,18 +285,21 @@ void draw() {
   fill(0);
   textSize(10);
   textAlign(LEFT, CENTER);
-  text("0",1140, 310);
-  text(top5Value[0]/2,1340, 310);
-  text(top5Value[0],1540, 310);
+  DecimalFormat f = new DecimalFormat("##.0");
+  float summaryXmin = top5Value[4]-1;
+  float summaryXmax = top5Value[0]; 
+  text(f.format(summaryXmin),1140, 310);
+  text(f.format((summaryXmax-summaryXmin)/2),1340, 310);
+  text(f.format(summaryXmax),1540, 310);
   for(int top5=0; top5 <5; top5++){
-    float amt = top5Value[top5]/top5Value[0]; 
+    float amt = (top5Value[top5] - summaryXmin)/(summaryXmax - summaryXmin); 
     float bar = lerp(0,400,amt);
     fill(#5E5F5F);
     rect(1140, 60+(top5*50), 1140+bar, 60+(top5*50)+25);
     fill(0);
-    textSize(10);
+    textSize(12);
     textAlign(LEFT, CENTER);
-    text(top5Name[top5]+": "+top5Value[top5], 1140, 60+(top5*50)-10);
+    text(top5Name[top5]+": "+f.format(top5Value[top5]), 1140, 60+(top5*50)-12);
   }
 
   // Info Graph - PM25 Input
@@ -355,9 +366,20 @@ void draw() {
   fill(colorForSelectedLocation2);
   text("(Color Blue)", 1270, 415);
   
+  String showSelectedLocation1 = "";
+  String showSelectedLocation2 = "";
+  for (TableRow loc: locationTable.findRows(selectedLocation1, "Local Site Name")){
+    DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
+    showSelectedLocation1 = name.locationShownName;
+  }
+  for (TableRow loc: locationTable.findRows(selectedLocation2, "Local Site Name")){
+    DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
+    showSelectedLocation2 = name.locationShownName;
+  }
   fill(0);
-  text(": " + selectedLocation1, 1322, 395);
-  text(": " + selectedLocation2, 1348, 415);
+  text(": " + showSelectedLocation1, 1322, 395);
+  text(": " + showSelectedLocation2, 1348, 415);
+ 
 
   line(xGraphZeroPoint, yGraphZeroPoint-graphHeight, xGraphZeroPoint, yGraphZeroPoint); // y axis
   line(xGraphZeroPoint, yGraphZeroPoint, xGraphZeroPoint+graphWidth, yGraphZeroPoint); // x axis
@@ -403,6 +425,59 @@ void draw() {
     );
     dailyGraph2.drawGraph();
   }
+
+  // legend
+  fill(#F9F9F9); // CHANGED? 
+  stroke(193, 193, 193);
+  //strokeWeight(4); // CHANGED (added)
+  rectMode(CORNERS);
+  rect(legendLocX_1-10, legendLocY_1-10, legendLocX_2, legendLocY_2);
+  
+  DataManipulation legend = new DataManipulation(); 
+  
+  // legend - PM2.5
+  textSize(20);
+  textAlign(CENTER, CENTER);
+  fill(0);
+  text("PM 2.5", legendLocX_middle, legendLocY_1+15 );
+  
+  noStroke();
+  float current_legendY = legendLocY_1+60;  
+  
+  for (int i=0; i<6; i++) {
+    float amt = 1.0 - (float)i/(6 - 1);
+    float radius = lerp(legend.minRadius, legend.maxRadius, amt);
+    color choosenColor = legend.lerpColorLab(legend.lowestPm25Color, legend.highestPm25Color, amt);
+    fill(choosenColor);
+    ellipseMode(RADIUS);
+    circle(legendLocX_middle+15, current_legendY, radius);
+    current_legendY += 2.10 * radius; 
+  }
+  
+  // legend - wind 
+  textSize(20);
+  textAlign(CENTER, CENTER);
+  fill(0);
+  text("Wind Speed", legendLocX_middle, legendLocY_middle);
+  current_legendY = legendLocY_middle + 60;
+  
+  rectMode(CENTER);
+  noStroke();
+  fill(30, 144, 255); 
+  for (int i=0; i < 4; i++){
+    pushMatrix();
+    translate((legendLocX_middle+legendLocX_2)/2,current_legendY);
+    rotate(2*PI/3);
+    rect(-5, 20, 5, -20);
+    current_legendY += 30;
+    popMatrix();
+  }
+
+  
+  textSize(15);
+  textAlign(CENTER, CENTER);
+  fill(0);
+  text("the star =\n the wind direction", legendLocX_middle, current_legendY+20); 
 
   // For pressing the scroll bar
   if (firstMousePress) {
@@ -464,7 +539,7 @@ void mouseWheel(MouseEvent e) {
 
 void loadRawDataTables() {
   // Load the pm25 table
-  pm25Table = loadTable("daily_88101_2020_california_final.csv", "header");
+  pm25Table = loadTable("daily_88101_2020_california_last.csv", "header");
   println("pm25 table:", pm25Table.getRowCount(), "x", pm25Table.getColumnCount());
   // Print several rows of the pm25 table
   TableUtils.printNRowFromTable(pm25Table, 3);
@@ -474,7 +549,7 @@ void loadRawDataTables() {
   println();
   
   // Load the wind table
-  windTable = loadTable("daily_WIND_2020_california_integrated_final.csv", "header");
+  windTable = loadTable("daily_WIND_2020_california_integrated_last.csv", "header");
   println("wind table:", windTable.getRowCount(), "x", windTable.getColumnCount());
   // Print several rows of the wind speed table
   TableUtils.printNRowFromTable(windTable, 3);
@@ -484,7 +559,7 @@ void loadRawDataTables() {
   println();
 
   // Load the location table
-  locationTable = loadTable("locations_final.csv", "header");
+  locationTable = loadTable("locations_last.csv", "header");
   println("location table:", locationTable.getRowCount(), "x", locationTable.getColumnCount());
   // Print several rows of the locations table
   TableUtils.printNRowFromTable(locationTable, 3);

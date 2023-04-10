@@ -1,7 +1,7 @@
 import java.lang.Exception;
 
 class DataManipulation {
-    String localSiteName, type;
+    String localSiteName, type, locationShownName;
     float latitude, longitude;
     float screenX, screenY;
     float pm25, pm25Normalized;
@@ -35,10 +35,14 @@ class DataManipulation {
         }
     }
 
+    public DataManipulation(){
+    }
+
     void fitLocation(TableRow row, PanZoomMap panZoomMap) {
         this.localSiteName = row.getString("Local Site Name");
         this.latitude = row.getFloat("Latitude");
         this.longitude = row.getFloat("Longitude");
+        this.locationShownName = row.getString("Location Shown");
         this.screenX = panZoomMap.longitudeToScreenX(longitude);
         this.screenY = panZoomMap.latitudeToScreenY(latitude);
     }
@@ -47,6 +51,7 @@ class DataManipulation {
         this.localSiteName = row.getString("Local Site Name");
         this.latitude = row.getFloat("Latitude");
         this.longitude = row.getFloat("Longitude");
+        this.locationShownName = row.getString("Location Shown");
         try {
             this.date = row.getString("Date Local");
         } catch (Exception e) {
@@ -75,6 +80,7 @@ class DataManipulation {
         this.localSiteName = row.getString("Local Site Name");
         this.latitude = row.getFloat("Latitude");
         this.longitude = row.getFloat("Longitude");
+        this.locationShownName = row.getString("Location Shown");
         try {
             this.date = row.getString("Date Local");
         } catch (Exception e) {

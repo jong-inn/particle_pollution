@@ -122,5 +122,5 @@ void showLocalSiteName(DataManipulation manipulatedData) {
     textAlign(LEFT, CENTER);
     float xTextOffset = 18; // Move the text to the right of the circle
     fill(111, 87, 0);
-    text(manipulatedData.localSiteName, manipulatedData.screenX + xTextOffset, manipulatedData.screenY);
+    text(manipulatedData.locationShownName, manipulatedData.screenX + xTextOffset, manipulatedData.screenY);
 }
