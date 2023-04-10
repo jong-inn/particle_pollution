@@ -74,7 +74,7 @@ class DataBuckets{
       }
     }
     for (int i = 0; i < countCity; i++){
-      pm25AvgValue[i] = totalValue[i] / Period.between(startDate, endDate).getDays();
+      pm25AvgValue[i] = totalValue[i] / (Period.between(startDate, endDate).getDays()+1);
     }
 
     // put averages into the average column
@@ -114,8 +114,8 @@ class DataBuckets{
       }
     }
     for (int i = 0; i < countCity; i++){
-      windAvgValue[i] = totalValue[i] / Period.between(startDate, endDate).getDays();
-      windAvgDirection[i] = totalDirection[i] / Period.between(startDate, endDate).getDays();
+      windAvgValue[i] = totalValue[i] / (Period.between(startDate, endDate).getDays()+1);
+      windAvgDirection[i] = totalDirection[i] / (Period.between(startDate, endDate).getDays()+1);
     }
 
     // put averages into the average column
