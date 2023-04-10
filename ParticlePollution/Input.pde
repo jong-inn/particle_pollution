@@ -42,7 +42,7 @@ String getLocationUnderMouse(Table locationTable, PanZoomMap panZoomMap) {
     float screenX = panZoomMap.longitudeToScreenX(longitude);
     float screenY = panZoomMap.latitudeToScreenY(latitude);
     float distSquared = (mouseX-screenX)*(mouseX-screenX) + (mouseY-screenY)*(mouseY-screenY);
-    float radius = 8; // fixed radius different with the original one
+    float radius = panZoomMap.mapLengthToScreenLength(0.1); // fixed radius different with the original one
     float radiusSquared = constrain(radius*radius, 1, height);
     if ((distSquared <= radiusSquared) && (radiusSquared < smallestRadiusSquared)) {
       underMouse = localSiteName;
@@ -54,7 +54,7 @@ String getLocationUnderMouse(Table locationTable, PanZoomMap panZoomMap) {
 
 // Hightlighting function
 
-void highlightingLocations(DataManipulation manipulatedData, String highlightedLocation, String selectedLocation1, String selectedLocation2) {
+void highlightingLocations(PanZoomMap panZoomMap, DataManipulation manipulatedData, String highlightedLocation, String selectedLocation1, String selectedLocation2) {
     // Highlight the location when hovering the mouse on the location
     // If two locations are already selected, do not show the highlights
     if (manipulatedData.localSiteName.equals(highlightedLocation) && !(selectedLocation1 != "" && selectedLocation2 != "")) {
@@ -71,7 +71,7 @@ void highlightingLocations(DataManipulation manipulatedData, String highlightedL
             radius = manipulatedData.radius;
         }
 
-        circle(manipulatedData.screenX, manipulatedData.screenY, radius + 5);
+        circle(manipulatedData.screenX, manipulatedData.screenY, panZoomMap.mapLengthToScreenLength((radius + 5)*0.01));
 
         showLocalSiteName(manipulatedData);
     }
@@ -93,7 +93,7 @@ void highlightingLocations(DataManipulation manipulatedData, String highlightedL
             noStroke();
             fill(255, 174, 66); // Yellow Orange
             ellipseMode(RADIUS);
-            circle(manipulatedData.screenX, manipulatedData.screenY, radius + 5);
+            circle(manipulatedData.screenX, manipulatedData.screenY, panZoomMap.mapLengthToScreenLength((radius + 5)*0.01));
 
             textSize(15);
             textAlign(CENTER, CENTER);
@@ -106,7 +106,7 @@ void highlightingLocations(DataManipulation manipulatedData, String highlightedL
             noStroke();
             fill(0, 57, 153); // Medium Dark Shade of Cyan Blue
             ellipseMode(RADIUS);
-            circle(manipulatedData.screenX, manipulatedData.screenY, radius + 5);
+            circle(manipulatedData.screenX, manipulatedData.screenY, panZoomMap.mapLengthToScreenLength((radius + 5)*0.01));
 
             textSize(15);
             textAlign(CENTER, CENTER);

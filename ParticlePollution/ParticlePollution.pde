@@ -11,40 +11,28 @@ Table windTable;
 Table locationTable;
 PImage map;
 
-// Table mantecaPm25Table;
-// Table mantecaWindTable;
-// Table modestoPm25Table;
-// Table modestoWindTable;
-
-// float[] data1; 
-// float[] data2;
-// int lineDataNum;
 float maxY;
-// int graphCount = 0;
 
 LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 float speed = 50;
 int totalDays = Period.between(startDate, endDate).getDays() + 1;
 float period = (totalDays-1) * speed;
-int day = -1;
+int day = 0;
 float count = 0;
 boolean status = false; // Paused in the beginning
 boolean windStatus = true; // Option for showing the wind data
+boolean firstMousePress = false;
+
+// Scroll bar variables
+float xPosScrollbar, yPosScrollbar;
+int widthScrollbar, heightScrollbar;
 
 String highlightedLocation = "";
 String selectedLocation1 = "";
 color colorForSelectedLocation1 = color(255, 174, 66); // Yellow Orange
 String selectedLocation2 = "";
 color colorForSelectedLocation2 = color(0, 57, 153); // Medium Dark Shade of Cyan Blue
-
-// float[] location1Pm25 = new float[11];
-// float[] location1WindSpeed = new float[11];
-// float[] location1WindDirection = new float[11];
-// float[] location2Pm25 = new float[11];
-// float[] location2WindSpeed = new float[11];
-// float[] location2WindDirection = new float[11];
-// String[] arrayStringDate = new String[11];
 
 String [] top5Name; // summary
 float [] top5Value; // summary
@@ -74,33 +62,11 @@ void setup() {
   // Size of the graphics window
   size(1600,900);
 
-  println("Total Days: "+totalDays);
-
   // Load a California map
   map = loadImage("california_simple_map.png");
 
   // Load tables
   loadRawDataTables();
-
-  // // Temporal tables for testing
-  // mantecaPm25Table = loadTable("manteca_pm25_test.csv", "header");
-  // mantecaWindTable = loadTable("manteca_wind_test.csv", "header");
-  // modestoPm25Table = loadTable("modesto_pm25_test.csv", "header");
-  // modestoWindTable = loadTable("modesto_wind_test.csv", "header");
-  // for (int i=0; i<mantecaPm25Table.getRowCount(); i++) {
-  //   location1Pm25[i] = mantecaPm25Table.getRow(i).getFloat("Arithmetic Mean");
-  //   location1WindSpeed[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
-  //   location1WindDirection[i] = mantecaWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
-
-  //   location2Pm25[i] = modestoPm25Table.getRow(i).getFloat("Arithmetic Mean");
-  //   location2WindSpeed[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Speed");
-  //   location2WindDirection[i] = modestoWindTable.getRow(i).getFloat("Arithmetic Mean Direction");
-
-  //   arrayStringDate[i] = mantecaPm25Table.getRow(i).getString("Date Local").replace("2020-", "");
-  // }
-
-  // data1 = Arrays.copyOf(location1Pm25, location1Pm25.length);
-  // data2 = Arrays.copyOf(location2Pm25, location2Pm25.length);
 
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
@@ -124,22 +90,12 @@ void setup() {
     arrayStringDate[countDay] = stringDate.replace("2020-", "");
   }
 
-  // Line Graph
-  // lineDataNum = 0;
-  // if (data1 == null && data2 == null){
-  //   println("empty"); 
-  // }else if ( data2 != null){
-  //   if (max(data1) > max(data2)){
-  //     maxY = max(data1);
-  //   } else {
-  //     maxY = max(data2);
-  //   }
-  // }else{
-  //   maxY = max(data1);
-  // }
-
   // Scroll bar
-  hScrollbar = new HScrollbar(100, height-50, 900, 16, 1, arrayStringDate, speed);
+  xPosScrollbar = 100;
+  yPosScrollbar = height-50;
+  widthScrollbar = 900;
+  heightScrollbar = 10;
+  hScrollbar = new HScrollbar(xPosScrollbar, yPosScrollbar, widthScrollbar, heightScrollbar, 1, arrayStringDate, speed);
 }
 
 void draw() {
@@ -148,11 +104,6 @@ void draw() {
 
   // Get highlighted location
   highlightedLocation = getLocationUnderMouse(locationTable, panZoomMap);
-  // println("Highlighted Location: "+highlightedLocation);
-
-  // Prepare arrays for selected locations
-  // if (selectedLocation1 != "") {
-   
 
   // Draw the bounds of the map
   fill(250);
@@ -174,58 +125,26 @@ void draw() {
   text("From: "+startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 50, 70);
   text("To  : "+endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 50, 100);
 
-  // Draw the play/stop status
-  //if (status == true) {
-  //  // For the background circle
-  //  fill(169, 169, 169); // Darkgray
-  //  noStroke();
-  //  ellipseMode(RADIUS);
-  //  circle(1560, 40, 15);
-
-  //  // For the two thin rectangles
-  //  fill(0);
-  //  noStroke();
-  //  rectMode(CORNER);
-  //  rect(1552, 30, 5, 21);
-  //  rect(1563, 30, 5, 21);
-
-  //} else if (status == false) {
-  //  // For the background circle
-  //  fill(169, 169, 169); // Darkgray
-  //  noStroke();
-  //  ellipseMode(RADIUS);
-  //  circle(1560, 40, 15);
-
-  //  // For the triangle
-  //  fill(0);
-  //  noStroke();
-  //  beginShape();
-  //  vertex(1553, 30);
-  //  vertex(1553, 50);
-  //  vertex(1571, 40);
-  //  endShape(CLOSE);
-  //}
-
   // Draw the location points
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
 
     // Highlight the locations
-    highlightingLocations(locationData, highlightedLocation, selectedLocation1, selectedLocation2);
+    highlightingLocations(panZoomMap, locationData, highlightedLocation, selectedLocation1, selectedLocation2);
 
     // If the pivot location is selected, filter out the remaining area
     if (selectedLocation1.equals(locationData.localSiteName)) {
       noStroke();
       fill(211, 211, 211, 60);
       ellipseMode(RADIUS);
-      circle(locationData.screenX, locationData.screenY, 50);
+      circle(locationData.screenX, locationData.screenY, panZoomMap.mapLengthToScreenLength(0.5));
     }
     
     // Draw city points
     fill(232, 81, 21);
     noStroke();
     ellipseMode(RADIUS);
-    circle(locationData.screenX, locationData.screenY, 2);
+    circle(locationData.screenX, locationData.screenY, panZoomMap.mapLengthToScreenLength(0.01));
   }
 
   // Store the current coordination
@@ -242,12 +161,12 @@ void draw() {
       DataManipulation summaryPm25Data = new DataManipulation(summaryPm25Row, panZoomMap, "pm25");
       
       // Highlight the locations
-      highlightingLocations(summaryPm25Data, highlightedLocation, selectedLocation1, selectedLocation2);
+      highlightingLocations(panZoomMap, summaryPm25Data, highlightedLocation, selectedLocation1, selectedLocation2);
 
       noStroke();
-      fill(summaryPm25Data.lerpColor);
+      fill(summaryPm25Data.lerpColor, 220);
       ellipseMode(RADIUS);
-      circle(summaryPm25Data.screenX, summaryPm25Data.screenY, summaryPm25Data.radius);
+      circle(summaryPm25Data.screenX, summaryPm25Data.screenY, panZoomMap.mapLengthToScreenLength(summaryPm25Data.radius*0.01));
     }
 
     // Draw the average wind data on the summary map
@@ -293,12 +212,12 @@ void draw() {
       DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
 
       // Highlight the locations
-      highlightingLocations(pm25Data, highlightedLocation, selectedLocation1, selectedLocation2);
+      highlightingLocations(panZoomMap, pm25Data, highlightedLocation, selectedLocation1, selectedLocation2);
 
       noStroke();
-      fill(pm25Data.lerpColor);
+      fill(pm25Data.lerpColor, 220);
       ellipseMode(RADIUS);
-      circle(pm25Data.screenX, pm25Data.screenY, pm25Data.radius);
+      circle(pm25Data.screenX, pm25Data.screenY, panZoomMap.mapLengthToScreenLength(pm25Data.radius*0.01));
 
     }
 
@@ -326,39 +245,13 @@ void draw() {
       }
     }
 
-    // if (windStatus == true) {
-    //   for (TableRow windRow : windTable.findRows(stringDate, "Date Local")) {
-    //     DataManipulation windData = new DataManipulation(windRow, panZoomMap, "wind");
-
-    //     pushMatrix();
-    //     translate(windData.screenX, windData.screenY); // Translate to the center of the location
-    //     rotate(radians(windData.windDirection - 180));
-    //     rectMode(CORNERS);
-    //     noStroke();
-    //     fill(30, 144, 255); // Dodgerblue
-    //     rect(-1, 7, 1, -7);
-
-    //     pushMatrix();
-    //     translate(0, 7); // Translate to the top of the rectangle
-    //     rotate(frameCount * windData.rotationSpeed);
-    //     noStroke();
-    //     fill(0, 191, 255); // Deepskyblue
-    //     star(0, 0, 3, 7, 5);
-    //     popMatrix();
-
-    //     popMatrix();
-    //   }
-    // }
-
     if (status == true) {
       count += 1;
     }
   }
 
-  // println("Count: "+count);
-  // println()
-  // hScrollbar.update(count);
-  // hScrollbar.display();
+  hScrollbar.update(count, firstMousePress, status);
+  hScrollbar.display();
   // if (hScrollbar.count != count) {
   //   count = hScrollbar.count;
   //   day = (int) count / (int) speed;
@@ -510,6 +403,11 @@ void draw() {
     );
     dailyGraph2.drawGraph();
   }
+
+  // For pressing the scroll bar
+  if (firstMousePress) {
+    firstMousePress = false;
+  }
 }
 
 void keyPressed() {
@@ -528,6 +426,13 @@ void keyPressed() {
 }
 
 void mousePressed() {
+  // For pressing the scroll bar
+  if (mouseX >= xPosScrollbar && mouseX <= (xPosScrollbar+widthScrollbar) && mouseY >= (yPosScrollbar+heightScrollbar) && mouseY <= yPosScrollbar) {
+    if (!firstMousePress) {
+      firstMousePress = true;
+    }
+  }
+
   // Select the pivot location
   if (highlightedLocation != "" && selectedLocation1.equals("") && !selectedLocation2.equals(highlightedLocation)) {
     selectedLocation1 = highlightedLocation;
@@ -545,6 +450,7 @@ void mousePressed() {
     println("Unselect the Location 2: "+selectedLocation2);
     selectedLocation2 = "";
   }
+
   panZoomMap.mousePressed();
 }
 
