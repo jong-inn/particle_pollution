@@ -23,6 +23,7 @@ float count = 0;
 boolean status = false; // Paused in the beginning
 boolean windStatus = true; // Option for showing the wind data
 boolean firstMousePress = false;
+boolean minmizedInfo = false;
 
 // Scroll bar variables
 float xPosScrollbar, yPosScrollbar;
@@ -57,6 +58,13 @@ float[] windSpeedInfoLocation2 = new float[totalDays];
 float[] windDirectionInfoLocation1 = new float[totalDays];
 float[] windDirectionInfoLocation2 = new float[totalDays];
 String[] arrayStringDate = new String[totalDays];
+
+ // Info Box (Date & Location) Variables
+int infoBoxX_1 = 800;
+int infoBoxX_2 = infoBoxX_1+250;
+int infoBoxY_1 = 75;
+int infoBoxY_2 = infoBoxY_1+125;
+int infoBoxLineY = infoBoxY_1+45;
 
 // Legend Variables
 float legendLocX_1 = 0;
@@ -127,12 +135,6 @@ void draw() {
   imageMode(CORNERS);
   image(map, mapX1, mapY1, mapX2, mapY2);
 
-  fill(0);
-  textSize(20);
-  textAlign(LEFT, CENTER);
-  text("From: "+startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 50, 70);
-  text("To  : "+endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 50, 100);
-
   // Draw the location points
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
@@ -159,10 +161,10 @@ void draw() {
   pushMatrix();
 
   if (count == 0) {
-    fill(0);
-    textSize(25);
-    textAlign(LEFT, CENTER);
-    text("Average Overview", 50, 30);
+    //fill(0);
+    //textSize(25);
+    //textAlign(LEFT, CENTER);
+    //text("Average Overview", 50, 30);
 
     // Draw the average PM25 data on the summary map
     for (TableRow summaryPm25Row : summaryPm25.summaryTable.rows()) {
@@ -211,10 +213,10 @@ void draw() {
       println("Date: "+stringDate2);
     }
     String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    textSize(30);
-    textAlign(CENTER, CENTER);
-    fill(0);
-    text(stringDate, 100, 20);
+    //textSize(30);
+    //textAlign(CENTER, CENTER);
+    //fill(0);
+    //text(stringDate, 100, 20);
 
     for (TableRow pm25Row : pm25Table.findRows(stringDate, "Date Local")) {
       DataManipulation pm25Data = new DataManipulation(pm25Row, panZoomMap, "pm25");
@@ -252,7 +254,7 @@ void draw() {
         popMatrix();
       }
     }
-
+  
     if (status == true) {
       count += 1;
     }
@@ -277,29 +279,38 @@ void draw() {
   
   // summary
   fill(0);
-  textSize(20);
   textAlign(LEFT, CENTER);
+  textSize(25);
   text("Top 5 Average", 1120, 20);
-  line(1130, 40, 1130, 300);
-  line(1130, 300, 1550, 300);
+  textSize(17);
+  text("From: "+startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 1135, 57);
+  text("To  : "+endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 1270, 57);
+  
+  line(1130, 90, 1130, 345);
+  line(1130, 345, 1550, 345);
   fill(0);
-  textSize(10);
+  textSize(13);
   textAlign(LEFT, CENTER);
   DecimalFormat f = new DecimalFormat("##.0");
   float summaryXmin = top5Value[4]-1;
   float summaryXmax = top5Value[0]; 
-  text(f.format(summaryXmin),1140, 310);
-  text(f.format((summaryXmax-summaryXmin)/2),1340, 310);
-  text(f.format(summaryXmax),1540, 310);
+  text(f.format(summaryXmin),1140, 355);
+  text(f.format((summaryXmax-summaryXmin)/2),1340, 355);
+  text(f.format(summaryXmax),1540, 355);
   for(int top5=0; top5 <5; top5++){
-    float amt = (top5Value[top5] - summaryXmin)/(summaryXmax - summaryXmin); 
-    float bar = lerp(0,400,amt);
-    fill(#5E5F5F);
-    rect(1140, 60+(top5*50), 1140+bar, 60+(top5*50)+25);
+    float valueAmt = (top5Value[top5] - summaryXmin)/(summaryXmax - summaryXmin); 
+    float bar = lerp(0,400,valueAmt);
+    DataManipulation summary = new DataManipulation();
+    float colorAmt = (top5Value[top5] - summary.minPm25) / (summary.maxPm25 - summary.minPm25);
+    color barColor = summary.lerpColorLab(summary.lowestPm25Color, summary.highestPm25Color, colorAmt);
+    fill(barColor);
+    noStroke();
+    rect(1140, 105+(top5*50), 1140+bar, 105+(top5*50)+25);
+    stroke(0); // Set the Stroke back for other parts of drawing
     fill(0);
     textSize(12);
     textAlign(LEFT, CENTER);
-    text(top5Name[top5]+": "+f.format(top5Value[top5]), 1140, 60+(top5*50)-12);
+    text(top5Name[top5]+": "+f.format(top5Value[top5]), 1140, 105+(top5*50)-12);
   }
 
   // Info Graph - PM25 Input
@@ -354,31 +365,31 @@ void draw() {
 
   // daily line graph
   fill(0);
-  textSize(20);
+  textSize(25);
   textAlign(LEFT, CENTER);
-  text("Daily Data for Selected Cities", 1120, 360);
-  textSize(15);
-  text("Pivot Location", 1140, 395);
-  text("Comparing Location",1140, 415);
+  text("Daily Data for Selected Cities", 1120, 405);
+  //textSize(15);
+  //text("Pivot Location", 1140, 395);
+  //text("Comparing Location",1140, 415);
 
-  fill(colorForSelectedLocation1);
-  text("(Color Yellow)", 1232, 395);
-  fill(colorForSelectedLocation2);
-  text("(Color Blue)", 1270, 415);
+  //fill(colorForSelectedLocation1);
+  //text("(Color Yellow)", 1232, 395);
+  //fill(colorForSelectedLocation2);
+  //text("(Color Blue)", 1270, 415);
   
-  String showSelectedLocation1 = "";
-  String showSelectedLocation2 = "";
-  for (TableRow loc: locationTable.findRows(selectedLocation1, "Local Site Name")){
-    DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
-    showSelectedLocation1 = name.locationShownName;
-  }
-  for (TableRow loc: locationTable.findRows(selectedLocation2, "Local Site Name")){
-    DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
-    showSelectedLocation2 = name.locationShownName;
-  }
-  fill(0);
-  text(": " + showSelectedLocation1, 1322, 395);
-  text(": " + showSelectedLocation2, 1348, 415);
+  //String showSelectedLocation1 = "";
+  //String showSelectedLocation2 = "";
+  //for (TableRow loc: locationTable.findRows(selectedLocation1, "Local Site Name")){
+  //  DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
+  //  showSelectedLocation1 = name.locationShownName;
+  //}
+  //for (TableRow loc: locationTable.findRows(selectedLocation2, "Local Site Name")){
+  //  DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
+  //  showSelectedLocation2 = name.locationShownName;
+  //}
+  //fill(0);
+  //text(": " + showSelectedLocation1, 1322, 395);
+  //text(": " + showSelectedLocation2, 1348, 415);
  
 
   line(xGraphZeroPoint, yGraphZeroPoint-graphHeight, xGraphZeroPoint, yGraphZeroPoint); // y axis
@@ -425,6 +436,65 @@ void draw() {
     );
     dailyGraph2.drawGraph();
   }
+  
+  // Info Box (Date & Location)
+  rectMode(CORNERS);
+  if (minmizedInfo == false){
+    //fill(#A5A3A3);
+    fill(#D1D1D1);
+    stroke(1);
+    rect(infoBoxX_1 ,infoBoxY_1-25, infoBoxX_2, infoBoxY_1, 5, 5, 0, 0);
+    fill(#F0EDED);
+    stroke(1);
+    rect(infoBoxX_1 ,infoBoxY_1, infoBoxX_2, infoBoxY_2, 0, 0, 5, 5);
+    
+    textAlign(LEFT, CENTER);
+    textSize(18);
+    fill(0);
+    if (count == 0){
+      text("Average Overview", infoBoxX_1+15, infoBoxY_1+15);
+      strokeWeight(1.5);
+      line(infoBoxX_1+14, infoBoxLineY-13, infoBoxX_1+150, infoBoxLineY-13); 
+      strokeWeight(1); // reset the strokeWeight
+    } else if (count !=0) {
+      String stringDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+      text("Date: "+stringDate, infoBoxX_1+15, infoBoxY_1+15);
+      strokeWeight(1.5);
+      line(infoBoxX_1+14, infoBoxLineY-13, infoBoxX_1+150, infoBoxLineY-13); 
+      strokeWeight(1); // reset the strokeWeight
+    }
+    
+    textSize(15);
+    fill(0);
+    text("Pivot Location", infoBoxX_1+20, infoBoxLineY);
+    text("Comparing Location", infoBoxX_1+20, (infoBoxLineY+infoBoxY_2)/2);
+    fill(colorForSelectedLocation1);
+    text("(Color Yellow)", (infoBoxX_1+20)+91, infoBoxLineY);
+    fill(colorForSelectedLocation2);
+    text("(Color Blue)", (infoBoxX_1+20)+129, (infoBoxLineY+infoBoxY_2)/2);
+    fill(0);
+    text(": ", (infoBoxX_1+20)+178, infoBoxLineY);
+    text(": ", (infoBoxX_1+20)+204, (infoBoxLineY+infoBoxY_2)/2);
+    
+    String showSelectedLocation1 = "";
+    String showSelectedLocation2 = "";
+    for (TableRow loc: locationTable.findRows(selectedLocation1, "Local Site Name")){
+      DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
+      showSelectedLocation1 = name.locationShownName;
+    }
+    for (TableRow loc: locationTable.findRows(selectedLocation2, "Local Site Name")){
+      DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
+      showSelectedLocation2 = name.locationShownName;
+    }
+    fill(0);
+    text(showSelectedLocation1, infoBoxX_1+22, infoBoxLineY+20);;
+    text(showSelectedLocation2, infoBoxX_1+22, (infoBoxLineY+infoBoxY_2)/2+20);;
+ 
+  }else{
+    fill(#A5A3A3);
+    rect(infoBoxX_1 ,infoBoxY_1-25, infoBoxX_2, infoBoxY_1, 5, 5, 5, 5);
+  }
+  
 
   // legend
   fill(#F9F9F9); // CHANGED? 
