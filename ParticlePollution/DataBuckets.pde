@@ -4,7 +4,8 @@ class DataBuckets{
   String city;
   LocalDate start = LocalDate.of(2020,1,1); 
   LocalDate end = LocalDate.of(2020,12,31);
-  String[] cityName;
+  String[] cityName; // local site name
+  String[] cityNameShown; // location shown
   float[] pm25AvgValue;
   float[] windAvgValue;
   float[] windAvgDirection;
@@ -50,16 +51,18 @@ class DataBuckets{
     // cityName
     int countCity = 0;
     cityName = new String[0];
+    cityNameShown = new String[0];
     for (TableRow summaryRow : summaryTable.rows()) {
       DataManipulation summaryData = new DataManipulation(summaryRow, panZoomMap, "location");
       countCity += 1; //total num of city
       cityName = append(cityName, summaryData.localSiteName);
+      cityNameShown = append(cityNameShown, summaryData.locationShownName);
     }
 
     // totalValue / avgValue
     float[] totalValue = new float[countCity];
     pm25AvgValue = new float[countCity];
-    for (int day = 0; day < Period.between(startDate, endDate).getDays(); day++){
+    for (int day = 0; day < (Period.between(startDate, endDate).getDays()+1) ; day++){
       String targetDate = startDate.plusDays(day).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
       for (TableRow pm25Row : pm25Table.findRows(targetDate, "Date Local")){
         DataManipulation pm25Data = new DataManipulation(pm25Row , panZoomMap, "pm25");
@@ -71,7 +74,7 @@ class DataBuckets{
       }
     }
     for (int i = 0; i < countCity; i++){
-      pm25AvgValue[i] = totalValue[i] / Period.between(startDate, endDate).getDays();
+      pm25AvgValue[i] = totalValue[i] / (Period.between(startDate, endDate).getDays()+1);
     }
 
     // put averages into the average column
@@ -85,10 +88,12 @@ class DataBuckets{
     // cityName
     int countCity = 0;
     cityName = new String[0];
+    cityNameShown = new String[0];
     for (TableRow summaryRow : summaryTable.rows()) {
       DataManipulation summaryData = new DataManipulation(summaryRow, panZoomMap, "location");
       countCity += 1; //total num of city
       cityName = append(cityName, summaryData.localSiteName);
+      cityNameShown = append(cityNameShown, summaryData.locationShownName);
     }
 
     // totalValue / avgValue
@@ -109,8 +114,8 @@ class DataBuckets{
       }
     }
     for (int i = 0; i < countCity; i++){
-      windAvgValue[i] = totalValue[i] / Period.between(startDate, endDate).getDays();
-      windAvgDirection[i] = totalDirection[i] / Period.between(startDate, endDate).getDays();
+      windAvgValue[i] = totalValue[i] / (Period.between(startDate, endDate).getDays()+1);
+      windAvgDirection[i] = totalDirection[i] / (Period.between(startDate, endDate).getDays()+1);
     }
 
     // put averages into the average column
@@ -141,7 +146,7 @@ class DataBuckets{
     String[] topName = new String[size];
     for (int i=0; i < pm25Top.length; i++){
       int index = pm25Top[i];
-      topName[i] = cityName[index];
+      topName[i] = cityNameShown[index];
     }
     return topName;
   }
