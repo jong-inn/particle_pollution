@@ -23,7 +23,7 @@ float count = 0;
 boolean status = false; // Paused in the beginning
 boolean windStatus = true; // Option for showing the wind data
 boolean firstMousePress = false;
-boolean minmizedInfo = false;
+boolean minimizedInfo = false;
 
 // Scroll bar variables
 float xPosScrollbar, yPosScrollbar;
@@ -127,7 +127,7 @@ void draw() {
 
   // Draw the bounds of the map
   fill(250);
-  stroke(111, 87, 0);
+  noStroke();
   rectMode(CORNERS);
   float mapX1 = panZoomMap.longitudeToScreenX(-125.0);
   float mapY1 = panZoomMap.latitudeToScreenY(32.0);
@@ -142,6 +142,33 @@ void draw() {
   // Draw the location points
   for (TableRow locationRow : locationTable.rows()) {
     DataManipulation locationData = new DataManipulation(locationRow, panZoomMap, "location");
+
+    // Connect the map and info box 
+    if (minimizedInfo == false){
+      float selectedX1 = 0;
+      float selectedX2 = 0;
+      float selectedY1 = 0;
+      float selectedY2 = 0;
+      for (TableRow loc: locationTable.findRows(selectedLocation1, "Local Site Name")){
+        DataManipulation connect = new DataManipulation(loc, panZoomMap, "location");
+        selectedX1 = connect.screenX;
+        selectedY1 = connect.screenY;
+      }
+      for (TableRow loc: locationTable.findRows(selectedLocation2, "Local Site Name")){
+        DataManipulation connect = new DataManipulation(loc, panZoomMap, "location");
+        selectedX2 = connect.screenX;
+        selectedY2 = connect.screenY;
+      }
+      // The line between map and info box
+      strokeWeight(0.1);
+      stroke(111, 87, 0);
+      if(selectedLocation1 != ""){
+        line(selectedX1, selectedY1, infoBoxX_1-9, infoBoxLineY+2.5);
+      }
+      if(selectedLocation2 != ""){
+        line(selectedX2, selectedY2, infoBoxX_1-9, (infoBoxLineY+infoBoxY_2)/2+2.5);
+      }
+    }
 
     // Highlight the locations
     highlightingLocations(panZoomMap, locationData, highlightedLocation, selectedLocation1, selectedLocation2);
@@ -327,7 +354,7 @@ void draw() {
     float valueAmt = (top5Value[top5] - summaryXmin)/(summaryXmax - summaryXmin); 
     float bar = lerp(0,400,valueAmt);
     DataManipulation summary = new DataManipulation();
-    float colorAmt = (top5Value[top5] - summary.minPm25) / (summary.maxPm25 - summary.minPm25);
+    float colorAmt = (constrain(top5Value[top5], summary.minPm25, summary.maxPm25) - summary.minPm25) / (summary.maxPm25 - summary.minPm25);
     color barColor = summary.lerpColorLab(summary.lowestPm25Color, summary.highestPm25Color, colorAmt);
     fill(barColor);
     noStroke();
@@ -394,28 +421,6 @@ void draw() {
   textSize(25);
   textAlign(LEFT, CENTER);
   text("Daily Data for Selected Cities", 1120, 405);
-  //textSize(15);
-  //text("Pivot Location", 1140, 395);
-  //text("Comparing Location",1140, 415);
-
-  //fill(colorForSelectedLocation1);
-  //text("(Color Yellow)", 1232, 395);
-  //fill(colorForSelectedLocation2);
-  //text("(Color Blue)", 1270, 415);
-  
-  //String showSelectedLocation1 = "";
-  //String showSelectedLocation2 = "";
-  //for (TableRow loc: locationTable.findRows(selectedLocation1, "Local Site Name")){
-  //  DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
-  //  showSelectedLocation1 = name.locationShownName;
-  //}
-  //for (TableRow loc: locationTable.findRows(selectedLocation2, "Local Site Name")){
-  //  DataManipulation name = new DataManipulation(loc, panZoomMap, "location");
-  //  showSelectedLocation2 = name.locationShownName;
-  //}
-  //fill(0);
-  //text(": " + showSelectedLocation1, 1322, 395);
-  //text(": " + showSelectedLocation2, 1348, 415);
  
 
   line(xGraphZeroPoint, yGraphZeroPoint-graphHeight, xGraphZeroPoint, yGraphZeroPoint); // y axis
@@ -465,14 +470,17 @@ void draw() {
   
   // Info Box (Date & Location)
   rectMode(CORNERS);
-  if (minmizedInfo == false){
-    //fill(#A5A3A3);
-    fill(#D1D1D1);
+  if (minimizedInfo == false){
+    fill(#A5A3A3);
     stroke(1);
     rect(infoBoxX_1 ,infoBoxY_1-25, infoBoxX_2, infoBoxY_1, 5, 5, 0, 0);
     fill(#F0EDED);
     stroke(1);
     rect(infoBoxX_1 ,infoBoxY_1, infoBoxX_2, infoBoxY_2, 0, 0, 5, 5);
+    fill(255);
+    circle(infoBoxX_1+13 ,infoBoxY_1-13, 7);
+    fill(0);
+    rect(infoBoxX_1+9, infoBoxY_1-13.5, infoBoxX_1+17, infoBoxY_1-12.5);
     
     textAlign(LEFT, CENTER);
     textSize(18);
@@ -490,17 +498,20 @@ void draw() {
       strokeWeight(1); // reset the strokeWeight
     }
     
+    fill(0);
+    circle(infoBoxX_1+19, infoBoxLineY+2.5, 2);
+    circle(infoBoxX_1+19, (infoBoxLineY+infoBoxY_2)/2+2.5, 2);
     textSize(15);
     fill(0);
-    text("Pivot Location", infoBoxX_1+20, infoBoxLineY);
-    text("Comparing Location", infoBoxX_1+20, (infoBoxLineY+infoBoxY_2)/2);
+    text("Pivot Location", infoBoxX_1+25, infoBoxLineY);
+    text("Comparing Location", infoBoxX_1+25, (infoBoxLineY+infoBoxY_2)/2);
     fill(colorForSelectedLocation1);
-    text("(Color Yellow)", (infoBoxX_1+20)+91, infoBoxLineY);
+    text("(Color Yellow)", (infoBoxX_1+25)+91, infoBoxLineY);
     fill(colorForSelectedLocation2);
-    text("(Color Blue)", (infoBoxX_1+20)+129, (infoBoxLineY+infoBoxY_2)/2);
+    text("(Color Blue)", (infoBoxX_1+25)+129, (infoBoxLineY+infoBoxY_2)/2);
     fill(0);
-    text(": ", (infoBoxX_1+20)+178, infoBoxLineY);
-    text(": ", (infoBoxX_1+20)+204, (infoBoxLineY+infoBoxY_2)/2);
+    text(": ", (infoBoxX_1+25)+178, infoBoxLineY);
+    text(": ", (infoBoxX_1+25)+20 , (infoBoxLineY+infoBoxY_2)/2);
     
     String showSelectedLocation1 = "";
     String showSelectedLocation2 = "";
@@ -513,12 +524,25 @@ void draw() {
       showSelectedLocation2 = name.locationShownName;
     }
     fill(0);
-    text(showSelectedLocation1, infoBoxX_1+22, infoBoxLineY+20);;
-    text(showSelectedLocation2, infoBoxX_1+22, (infoBoxLineY+infoBoxY_2)/2+20);;
+    text(showSelectedLocation1, infoBoxX_1+26, infoBoxLineY+20);;
+    text(showSelectedLocation2, infoBoxX_1+26, (infoBoxLineY+infoBoxY_2)/2+20);;
+
+    stroke(111, 87, 0);
+    if (showSelectedLocation1 != ""){
+      line(infoBoxX_1-9, infoBoxLineY+2.5, infoBoxX_1+19, infoBoxLineY+2.5);
+    }
+    if (showSelectedLocation2 != ""){
+      line(infoBoxX_1-9, (infoBoxLineY+infoBoxY_2)/2+2.5, infoBoxX_1+19, (infoBoxLineY+infoBoxY_2)/2+2.5);
+    }
  
   }else{
+    stroke(1);
     fill(#A5A3A3);
-    rect(infoBoxX_1 ,infoBoxY_1-25, infoBoxX_2, infoBoxY_1, 5, 5, 5, 5);
+    rect(infoBoxX_1 ,infoBoxY_1-26, infoBoxX_2, infoBoxY_1, 5, 5, 5, 5);
+    fill(255);
+    circle(infoBoxX_1+13 ,infoBoxY_1-13, 7);
+    fill(0);
+    rect(infoBoxX_1+9, infoBoxY_1-13.5, infoBoxX_1+17, infoBoxY_1-12.5);
   }
   
 
@@ -619,6 +643,12 @@ void mousePressed() {
   } else if (highlightedLocation.equals(selectedLocation2)) {
     println("Unselect the Location 2: "+selectedLocation2);
     selectedLocation2 = "";
+  }
+
+  // Minimized the Info Box
+  if (mouseX < infoBoxX_1+18 && mouseY < infoBoxY_1-8 && mouseX > infoBoxX_1+8 && mouseY > infoBoxY_1-18){
+    if (minimizedInfo == false){ minimizedInfo = true; }
+    else { minimizedInfo = false; }
   }
 
   panZoomMap.mousePressed();
