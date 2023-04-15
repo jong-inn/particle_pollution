@@ -34,7 +34,7 @@ LocalDate getLocalDate(String s) {
 // smallest municipality will be returned, since this is usually the hardest one to select.
 String getLocationUnderMouse(Table locationTable, PanZoomMap panZoomMap) {
   float smallestRadiusSquared = Float.MAX_VALUE;
-  String underMouse = "";
+  String underMouse = "NONE";
   for (TableRow locationRow : locationTable.rows()) {
     String localSiteName = locationRow.getString("Local Site Name");
     float latitude = locationRow.getFloat("Latitude");

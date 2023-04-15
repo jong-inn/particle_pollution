@@ -15,9 +15,9 @@ float maxY;
 
 LocalDate startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
 LocalDate endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
-float speed = 50;
+float speed, period;
 int totalDays = Period.between(startDate, endDate).getDays() + 1;
-float period = (totalDays-1) * speed;
+// float period = (totalDays-1) * speed;
 int day = 0;
 float count = 0;
 boolean status = false; // Paused in the beginning
@@ -28,7 +28,7 @@ boolean firstMousePress = false;
 float xPosScrollbar, yPosScrollbar;
 int widthScrollbar, heightScrollbar;
 
-String highlightedLocation = "";
+String highlightedLocation = "NONE";
 String selectedLocation1 = "";
 color colorForSelectedLocation1 = color(255, 174, 66); // Yellow Orange
 String selectedLocation2 = "";
@@ -71,7 +71,7 @@ void setup() {
   size(1600,900);
 
   // Load a California map
-  map = loadImage("california_simple_map.png");
+  map = loadImage("cal_map.png");
 
   // Load tables
   loadRawDataTables();
@@ -84,6 +84,10 @@ void setup() {
   top5Value = summaryPm25.pm25TopValue(5);
 
   summaryWind = new DataBuckets("wind", locationTable, windTable, startDate, endDate);
+
+  // Speed of the video
+  speed = 50;
+  period = (totalDays) * speed;
 
   // Info Graph
   Arrays.fill(pm25InfoLocation1,-1);
@@ -99,9 +103,9 @@ void setup() {
   }
 
   // Scroll bar
-  xPosScrollbar = 100;
-  yPosScrollbar = height-50;
-  widthScrollbar = 900;
+  xPosScrollbar = 0;
+  yPosScrollbar = height-35;
+  widthScrollbar = 1100;
   heightScrollbar = 10;
   hScrollbar = new HScrollbar(xPosScrollbar, yPosScrollbar, widthScrollbar, heightScrollbar, 1, arrayStringDate, speed);
 }
@@ -178,26 +182,28 @@ void draw() {
     }
 
     // Draw the average wind data on the summary map
-    for (TableRow summaryWindRow : summaryWind.summaryTable.rows()) {
-      DataManipulation summaryWindData = new DataManipulation(summaryWindRow, panZoomMap, "wind");
-      
-      pushMatrix();
-      translate(summaryWindData.screenX, summaryWindData.screenY); // Translate to the center of the location
-      rotate(radians(summaryWindData.windDirection - 180));
-      rectMode(CORNERS);
-      noStroke();
-      fill(30, 144, 255); // Dodgerblue
-      rect(-1, 7, 1, -7);
+    if (windStatus == true) {
+      for (TableRow summaryWindRow : summaryWind.summaryTable.rows()) {
+        DataManipulation summaryWindData = new DataManipulation(summaryWindRow, panZoomMap, "wind");
+        
+        pushMatrix();
+        translate(summaryWindData.screenX, summaryWindData.screenY); // Translate to the center of the location
+        rotate(radians(summaryWindData.windDirection - 180));
+        rectMode(CORNERS);
+        noStroke();
+        fill(30, 144, 255); // Dodgerblue
+        rect(-1, 7, 1, -7);
 
-      pushMatrix();
-      translate(0, 7); // Translate to the top of the rectangle
-      rotate(frameCount * summaryWindData.rotationSpeed);
-      noStroke();
-      fill(0, 191, 255); // Deepskyblue
-      star(0, 0, 3, 7, 5);
-      popMatrix();
+        pushMatrix();
+        translate(0, 7); // Translate to the top of the rectangle
+        rotate(frameCount * summaryWindData.rotationSpeed);
+        noStroke();
+        fill(0, 191, 255); // Deepskyblue
+        star(0, 0, 3, 7, 5);
+        popMatrix();
 
-      popMatrix();
+        popMatrix();
+      }
     }
 
     if (status == true) {
@@ -253,18 +259,37 @@ void draw() {
       }
     }
 
+    // Increase count in the range from 1 to period-0.001
     if (status == true) {
       count += 1;
+      count = constrain(count, 1, period-0.001);
+    }
+
+    // Stop the video in the end
+    if (count == period-0.001) {
+      status = false;
     }
   }
 
-  hScrollbar.update(count, firstMousePress, status);
+  // Display the updated scroll bar
+  hScrollbar.update(count, firstMousePress, status, windStatus);
   hScrollbar.display();
-  // if (hScrollbar.count != count) {
-  //   count = hScrollbar.count;
-  //   day = (int) count / (int) speed;
-  // }
 
+  // Change the play and wind status
+  status = hScrollbar.status;
+  windStatus = hScrollbar.windBox;
+
+  // Change the speed
+  speed = hScrollbar.speed;
+  period = (totalDays) * speed;
+
+  // Change the count and day when returning the new playing point
+  count = hScrollbar.count;
+  if ((int) count == 0) {
+    day = 0;
+  } else {
+    day = (int) count / (int) speed;
+  }
 
   // Restore the first coordination
   popMatrix();
@@ -502,18 +527,17 @@ void keyPressed() {
 
 void mousePressed() {
   // For pressing the scroll bar
-  if (mouseX >= xPosScrollbar && mouseX <= (xPosScrollbar+widthScrollbar) && mouseY >= (yPosScrollbar+heightScrollbar) && mouseY <= yPosScrollbar) {
-    if (!firstMousePress) {
-      firstMousePress = true;
-    }
+  if (!firstMousePress) {
+    firstMousePress = true;
+    println("First Mouse Press: "+firstMousePress);
   }
 
   // Select the pivot location
-  if (highlightedLocation != "" && selectedLocation1.equals("") && !selectedLocation2.equals(highlightedLocation)) {
+  if (!highlightedLocation.equals("NONE") && selectedLocation1.equals("") && !selectedLocation2.equals(highlightedLocation)) {
     selectedLocation1 = highlightedLocation;
     println("Selected Location 1: " + selectedLocation1);
   // Select the comparing location
-  } else if (highlightedLocation != "" && selectedLocation2.equals("") && !selectedLocation1.equals(highlightedLocation)) {
+  } else if (!highlightedLocation.equals("NONE") && selectedLocation2.equals("") && !selectedLocation1.equals(highlightedLocation)) {
     selectedLocation2 = highlightedLocation;
     println("Selected Location 2: " + selectedLocation2);
   // Unselect the pviot location
