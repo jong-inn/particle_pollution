@@ -95,10 +95,6 @@ void highlightingLocations(PanZoomMap panZoomMap, DataManipulation manipulatedDa
             ellipseMode(RADIUS);
             circle(manipulatedData.screenX, manipulatedData.screenY, panZoomMap.mapLengthToScreenLength((radius + 5)*0.01));
 
-            textSize(15);
-            textAlign(CENTER, CENTER);
-            // fill(0);
-            text("Pivot Location", manipulatedData.screenX, manipulatedData.screenY - 25);
             showLocalSiteName(manipulatedData);
         // Show the info of comparing location
         } else if (selectedLocation2.equals(manipulatedData.localSiteName)) {
@@ -108,10 +104,6 @@ void highlightingLocations(PanZoomMap panZoomMap, DataManipulation manipulatedDa
             ellipseMode(RADIUS);
             circle(manipulatedData.screenX, manipulatedData.screenY, panZoomMap.mapLengthToScreenLength((radius + 5)*0.01));
 
-            textSize(15);
-            textAlign(CENTER, CENTER);
-            // fill(0);
-            text("Comparing Location", manipulatedData.screenX, manipulatedData.screenY + 25);
             showLocalSiteName(manipulatedData);
         }
     }
@@ -120,7 +112,7 @@ void highlightingLocations(PanZoomMap panZoomMap, DataManipulation manipulatedDa
 void showLocalSiteName(DataManipulation manipulatedData) {
     textSize(14);
     textAlign(LEFT, CENTER);
-    float xTextOffset = 18; // Move the text to the right of the circle
-    fill(111, 87, 0);
-    text(manipulatedData.locationShownName, manipulatedData.screenX + xTextOffset, manipulatedData.screenY);
+    float xTextOffset = 0.2; // Move the text to the right of the circle
+    fill(255, 0, 0);
+    text(manipulatedData.locationShownName, manipulatedData.screenX + panZoomMap.mapLengthToScreenLength(xTextOffset), manipulatedData.screenY);
 }

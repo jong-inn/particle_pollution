@@ -191,17 +191,17 @@ void draw() {
         pushMatrix();
         translate(summaryWindData.screenX, summaryWindData.screenY); // Translate to the center of the location
         rotate(radians(summaryWindData.windDirection - 180));
-        rectMode(CORNERS);
+        rectMode(CORNER);
         noStroke();
         fill(30, 144, 255); // Dodgerblue
-        rect(-1, 7, 1, -7);
+        rect(-panZoomMap.mapLengthToScreenLength(0.02/2), -panZoomMap.mapLengthToScreenLength(0.14/2), panZoomMap.mapLengthToScreenLength(0.02), panZoomMap.mapLengthToScreenLength(0.14));
 
         pushMatrix();
-        translate(0, 7); // Translate to the top of the rectangle
+        translate(0, panZoomMap.mapLengthToScreenLength(0.14/2)); // Translate to the top of the rectangle
         rotate(frameCount * summaryWindData.rotationSpeed);
         noStroke();
         fill(0, 191, 255); // Deepskyblue
-        star(0, 0, 3, 7, 5);
+        star(0, 0, panZoomMap.mapLengthToScreenLength(0.025), panZoomMap.mapLengthToScreenLength(0.06), 5);
         popMatrix();
 
         popMatrix();
@@ -244,17 +244,19 @@ void draw() {
         pushMatrix();
         translate(windData.screenX, windData.screenY); // Translate to the center of the location
         rotate(radians(windData.windDirection - 180));
-        rectMode(CORNERS);
+        rectMode(CORNER);
         noStroke();
         fill(30, 144, 255); // Dodgerblue
-        rect(-1, 7, 1, -7);
+        // rect(-1, 7, 1, -7);
+        rect(-panZoomMap.mapLengthToScreenLength(0.02/2), -panZoomMap.mapLengthToScreenLength(0.14/2), panZoomMap.mapLengthToScreenLength(0.02), panZoomMap.mapLengthToScreenLength(0.14));
 
         pushMatrix();
-        translate(0, 7); // Translate to the top of the rectangle
+        translate(0, panZoomMap.mapLengthToScreenLength(0.14/2)); // Translate to the top of the rectangle
         rotate(frameCount * windData.rotationSpeed);
         noStroke();
         fill(0, 191, 255); // Deepskyblue
-        star(0, 0, 3, 7, 5);
+        // star(0, 0, 3, 7, 5);
+        star(0, 0, panZoomMap.mapLengthToScreenLength(0.025), panZoomMap.mapLengthToScreenLength(0.06), 5);
         popMatrix();
 
         popMatrix();
