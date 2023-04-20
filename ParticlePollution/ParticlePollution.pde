@@ -3,6 +3,7 @@ import java.util.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.text.DecimalFormat;
 
 // === GLOBAL VARIBALES ===
 
@@ -71,7 +72,7 @@ float legendLocX_1 = 0;
 float legendLocX_2 = 130;
 float legendLocX_middle = (legendLocX_1 + legendLocX_2)/2;
 float legendLocY_1 = 0;
-float legendLocY_2 = 500;
+float legendLocY_2 = 400;
 float legendLocY_middle = (legendLocY_1 + legendLocY_2)/2;
 
 void setup() {
@@ -346,7 +347,7 @@ void draw() {
   fill(0);
   textSize(13);
   textAlign(LEFT, CENTER);
-  DecimalFormat f = new DecimalFormat("##.0");
+  DecimalFormat f = new DecimalFormat("##.#");
   float summaryXmin = top5Value[4]-1;
   float summaryXmax = top5Value[0]; 
   text(f.format(summaryXmin),1140, 355);
@@ -549,8 +550,9 @@ void draw() {
   
 
   // legend
-  fill(#F9F9F9); // CHANGED? 
-  stroke(193, 193, 193);
+  fill(250); // CHANGED? 
+  stroke(0);
+  strokeWeight(1);
   //strokeWeight(4); // CHANGED (added)
   rectMode(CORNERS);
   rect(legendLocX_1-10, legendLocY_1-10, legendLocX_2, legendLocY_2);
@@ -559,47 +561,85 @@ void draw() {
   
   // legend - PM2.5
   textSize(20);
-  textAlign(CENTER, CENTER);
+  textAlign(RIGHT, CENTER);
   fill(0);
-  text("PM 2.5", legendLocX_middle, legendLocY_1+15 );
-  
+  text("PM 2.5", legendLocX_middle, legendLocY_1+15);
+  textSize(12);
+  textAlign(LEFT, CENTER);
+  text("(μg/m^3)", legendLocX_middle+5, legendLocY_1+18);
+
   noStroke();
   float current_legendY = legendLocY_1+60;  
   
   for (int i=0; i<6; i++) {
     float amt = 1.0 - (float)i/(6 - 1);
     float radius = lerp(legend.minRadius, legend.maxRadius, amt);
-    color choosenColor = legend.lerpColorLab(legend.lowestPm25Color, legend.highestPm25Color, amt);
-    fill(choosenColor);
+    color chosenColor = legend.lerpColorLab(legend.lowestPm25Color, legend.highestPm25Color, amt);
+    fill(chosenColor);
     ellipseMode(RADIUS);
-    circle(legendLocX_middle+15, current_legendY, radius);
-    current_legendY += 2.10 * radius; 
+    circle(legendLocX_middle-20, current_legendY+i*28, radius);
+    textSize(14);
+    textAlign(LEFT, CENTER);
+    fill(0);
+    float tmp = lerp(legend.minPm25, legend.maxPm25, amt);
+    text("≥  "+f.format((double) tmp), legendLocX_middle+15, current_legendY+i*28-3);
   }
   
   // legend - wind 
-  textSize(20);
+  textSize(17);
   textAlign(CENTER, CENTER);
   fill(0);
-  text("Wind Speed", legendLocX_middle, legendLocY_middle);
-  current_legendY = legendLocY_middle + 60;
+  text("Wind Speed", legendLocX_middle-12, legendLocY_middle+30);
+  textSize(12);
+  textAlign(LEFT, CENTER);
+  text("(kn)", legendLocX_middle+35, legendLocY_middle+32);
   
-  rectMode(CENTER);
-  noStroke();
-  fill(30, 144, 255); 
-  for (int i=0; i < 4; i++){
+  // Store the original coordinate
+  pushMatrix();
+  translate(legendLocX_middle-20, legendLocY_middle + 52);
+
+  for (int i=0; i < 4; i++) {
+    float amt;
+    if (i != 3) {
+      amt = (1.0 - (float)i/(4 - 1)) * 0.7;
+    } else {
+      amt = 0.05;
+    }
     pushMatrix();
-    translate((legendLocX_middle+legendLocX_2)/2,current_legendY);
-    rotate(2*PI/3);
-    rect(-5, 20, 5, -20);
-    current_legendY += 30;
+    translate(0,20+i*30);
+    rotate(radians(-60));
+    rectMode(CORNERS);
+    noStroke();
+    fill(30, 144, 255); // Dodgerblue
+    rect(-2, 15, 2, -15);
+
+    rotate(radians(60));
+    textSize(14);
+    textAlign(LEFT, CENTER);
+    fill(0);
+    float tmp = lerp(legend.minWindSpeed, legend.maxWindSpeed, amt);
+    text("≥  "+f.format((double) tmp), 30, 0);
+    rotate(radians(-60));
+
+    pushMatrix();
+    translate(0, -15);
+    rotate(frameCount * amt);
+    noStroke();
+    fill(0, 191, 255); // Deepskyblue
+    star(0, 0, 4.5, 10.5, 5);
     popMatrix();
+
+    popMatrix();
+
   }
+  // Restore the original coordinate
+  popMatrix();
 
   
-  textSize(15);
-  textAlign(CENTER, CENTER);
-  fill(0);
-  text("the star =\n the wind direction", legendLocX_middle, current_legendY+20); 
+  // textSize(15);
+  // textAlign(CENTER, CENTER);
+  // fill(0);
+  // text("the star =\n the wind direction", legendLocX_middle, current_legendY+20); 
 
   // For pressing the scroll bar
   if (firstMousePress) {
