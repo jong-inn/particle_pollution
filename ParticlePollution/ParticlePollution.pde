@@ -618,7 +618,11 @@ void draw() {
     textAlign(LEFT, CENTER);
     fill(0);
     float tmp = lerp(legend.minWindSpeed, legend.maxWindSpeed, amt);
-    text("≥  "+f.format((double) tmp), 30, 0);
+    if (i != 3) {
+      text("≥  "+f.format((double) tmp), 30, 0);
+    } else {
+      text(">  "+f.format((double) tmp), 30, 0);
+    }
     rotate(radians(-60));
 
     pushMatrix();
