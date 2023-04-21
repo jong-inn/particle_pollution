@@ -14,15 +14,17 @@ class DataManipulation {
     float minPm25 = 0.0;
     float maxPm25 = 20.0;
     float minRadius = 3.0;
-    float maxRadius = 10.0;
+    float maxRadius = 13.0;
 
     float minWindSpeed = 0.0;
     float maxWindSpeed = 10.0;
     float minRotationSpeed = 0.0;
     float maxRotationSpeed = 1.0;
 
-    color lowestPm25Color = color(255, 131, 0); // Orange
-    color highestPm25Color = color(139, 0, 0); // Dark Red
+    //color lowestPm25Color = color(255, 131, 0); // Orange
+    //color highestPm25Color = color(139, 0, 0); // Dark Red
+    color lowestPm25Color = color(250, 222, 224); 
+    color highestPm25Color = color(100, 0, 0); 
 
     public DataManipulation(TableRow row, PanZoomMap panZoomMap, String type) {
         this.type = type;

@@ -92,6 +92,10 @@ void setup() {
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
 
+  //panZoomMap.scale = 20;
+  panZoomMap.translateX = 170;
+  panZoomMap.translateY = 0;
+
 }
 
 void draw() {
@@ -248,6 +252,21 @@ void draw() {
         fill(summaryPm25Data.lerpColor, 220);
         ellipseMode(RADIUS);
         circle(summaryPm25Data.screenX, summaryPm25Data.screenY, panZoomMap.mapLengthToScreenLength(summaryPm25Data.radius*0.01));
+        stroke(1);
+
+        for (int i=0; i<top5Name.length; i++){
+          if (top5Name[i].equals(summaryPm25Data.locationShownName)){
+            textSize(14);
+            textAlign(LEFT, CENTER);
+            float xTextOffset = 0.2; // Move the text to the right of the circle
+            if(summaryPm25Data.localSiteName.equals(selectedLocation1) || summaryPm25Data.localSiteName.equals(selectedLocation2)){
+              fill(255, 0, 0);
+            } else {
+              fill(0);
+            }
+            text(summaryPm25Data.locationShownName + " [ Rank "+(i+1)+" ]", summaryPm25Data.screenX + panZoomMap.mapLengthToScreenLength(xTextOffset), summaryPm25Data.screenY);
+          }
+        }
       }
 
       // Draw the average wind data on the summary map
@@ -302,6 +321,19 @@ void draw() {
         ellipseMode(RADIUS);
         circle(pm25Data.screenX, pm25Data.screenY, panZoomMap.mapLengthToScreenLength(pm25Data.radius*0.01));
 
+        for (int i=0; i<top5Name.length; i++){
+          if (top5Name[i].equals(pm25Data.locationShownName)){
+            textSize(14);
+            textAlign(LEFT, CENTER);
+            float xTextOffset = 0.2; // Move the text to the right of the circle
+            if(pm25Data.localSiteName.equals(selectedLocation1) || pm25Data.localSiteName.equals(selectedLocation2)){
+              fill(255, 0, 0);
+            } else {
+              fill(0);
+            }
+            text(pm25Data.locationShownName + " [ Rank "+(i+1)+" ]", pm25Data.screenX + panZoomMap.mapLengthToScreenLength(xTextOffset), pm25Data.screenY);
+          }
+        }
       }
 
       if (windStatus == true) {
@@ -366,7 +398,9 @@ void draw() {
     // Restore the first coordination
     popMatrix();
   
-    //rectangle with details
+    //rectangle with details (graphs)
+    stroke(0);
+    strokeWeight(1);
     fill(250);
     stroke(111, 87, 0);
     rectMode(CORNERS);
@@ -511,6 +545,8 @@ void draw() {
     }
   
     // Info Box (Date & Location)
+    stroke(0);
+    strokeWeight(1);
     rectMode(CORNERS);
     if (minimizedInfo == false){
       fill(#A5A3A3);
@@ -659,7 +695,7 @@ void draw() {
       if (i != 3) {
         text("≥  "+f.format((double) tmp), 30, 0);
       } else {
-        text(">  "+f.format((double) tmp), 30, 0);
+        text(">  0", 30, 0);
       }
       rotate(radians(-60));
 
