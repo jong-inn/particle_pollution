@@ -9,11 +9,8 @@ import java.time.format.DateTimeFormatter;
 // Beginning Page Variables
 String startDateString = "";
 String endDateString = "";
-boolean getStartDate = false;
-boolean getEndDate = false;
-boolean getErrorDate = false;
+boolean goingToEnter = false;
 boolean goingToStart = false; 
-String typingDate = ""; 
 
 Table pm25Table;
 Table windTable;
@@ -90,35 +87,20 @@ void setup() {
 
   // Construct a new PanZoomMap object
   panZoomMap = new PanZoomMap(32.0, -125.0, 43.0, -114.0);
+  
+  
+  //  Beginning Page  
+  beginningPage(goingToEnter, "", "");
 
 }
 
 void draw() {
 
-  if (!getStartDate){   
-
-    beginningPage(getStartDate, getEndDate, getErrorDate, goingToStart, typingDate, "");
-    if ( !startDateString.equals("") ){
-      getStartDate = true;
-      getErrorDate = false;
-    }
-
-  }else if ( getStartDate && !getEndDate ){
-
-    beginningPage(getStartDate, getEndDate, getErrorDate, goingToStart, startDateString, typingDate);
-    if ( !endDateString.equals("") ){
-      getEndDate = true;
-      getErrorDate = false;
-    } 
-
-  } else if ( getStartDate && getEndDate && !goingToStart ){
-
-    beginningPage(getStartDate, getEndDate, getErrorDate, goingToStart, startDateString, endDateString);
-
-  } else {
-
+  if ( !goingToStart && goingToEnter ){
+    
+    beginningPage(goingToEnter, startDateString, endDateString);
+    
     // Setup for starting the Map
-
     // Speed of the video
     totalDays = Period.between(startDate, endDate).getDays() + 1; 
     speed = 50;
@@ -156,6 +138,8 @@ void draw() {
     widthScrollbar = 1100;
     heightScrollbar = 10;
     hScrollbar = new HScrollbar(xPosScrollbar, yPosScrollbar, widthScrollbar, heightScrollbar, 1, arrayStringDate, speed);
+  
+  } else if ( goingToStart && goingToEnter ) {
 
     // Draw the Map
 
@@ -633,8 +617,7 @@ void draw() {
       current_legendY += 30;
       popMatrix();
     }
-
-  
+    
     textSize(15);
     textAlign(CENTER, CENTER);
     fill(0);
@@ -660,53 +643,26 @@ void keyPressed() {
       println("play");
     }
   }
-
-  if ( (!getEndDate) && (key == ENTER) ){
-    try {
-      if ( !getStartDate ){
-         startDate = LocalDate.parse(typingDate);
-         startDateString = typingDate;
-      } else if ( getStartDate && !getEndDate ){
-         endDate = LocalDate.parse(typingDate);
-         endDateString = typingDate;
-      }  
-      typingDate = "";
-    } catch (DateTimeParseException e){ 
-        getErrorDate = true;
-        typingDate = "";
-    }
-   } else {
-    // Concatenate the String: Each character typed by the user is added to the end of the String variable.
-      typingDate = typingDate + key; 
-  }
 }
 
 void mousePressed() {
   
   if ( !goingToStart ){
+      
+      if ( !goingToEnter ){
+        if ( mouseX > 900 && mouseY > 620 && mouseX < 1060 && mouseY < 652){
+          goingToEnter = true;
+          startDate = getLocalDate("Enter the starting date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
+          endDate = getLocalDate("Enter the end date: "+"\nformat: yyyy-mm-dd\ne.g. 2020-01-03"+"\ntime range: 2020-01-01 ~ 2020-12-31");
+          startDateString = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+          endDateString = endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }  
+      } else {
+        if ( mouseX > 900 && mouseY > 620 && mouseX < 1060 && mouseY < 652){
+          goingToStart = true;
+        }  
+      }
     
-    if (getStartDate && getEndDate){
-      if( mouseX > 990 && mouseY > 620 && mouseX < 1066 && mouseY < 652)
-      {
-        goingToStart = true;
-      }
-      if ( mouseX > 890 && mouseY > 620 && mouseX < 966 && mouseY < 652){
-        startDateString = "";
-        endDateString = "";
-        getStartDate = false;
-        getEndDate = false;
-        getErrorDate = false;
-      }
-    } else {
-      if ( mouseX > 900 && mouseY > 620 && mouseX < 1060 && mouseY < 652){
-        startDateString = "";
-        endDateString = "";
-        getStartDate = false;
-        getEndDate = false;
-        getErrorDate = false;
-        typingDate = "";
-      }   
-    }
   } else {
     // For pressing the scroll bar
     if (!firstMousePress) {
