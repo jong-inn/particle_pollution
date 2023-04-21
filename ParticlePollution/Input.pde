@@ -3,33 +3,33 @@ import javax.swing.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
-String prompt(String s) {
-    println(s);
-    String entry = JOptionPane.showInputDialog(s);
-    if (entry == null) {
-        return null;
-    }
-    println(entry);
-    return entry;
-}
+//String prompt(String s) {
+//    println(s);
+//    String entry = JOptionPane.showInputDialog(s);
+//    if (entry == null) {
+//        return null;
+//    }
+//    println(entry);
+//    return entry;
+//}
 
-String getString(String s) {
-    return prompt(s);
-}
+//String getString(String s) {
+//    return prompt(s);
+//}
 
-LocalDate getLocalDate(String s) {
-    while (true) {
-        try {
-            LocalDate date = LocalDate.parse(prompt(s));
-            return date;
-        } catch (DateTimeParseException e) {
-            println("Please try again.");
-        }
-    }
-}
+//LocalDate getLocalDate(String s) {
+//    while (true) {
+//        try {
+//            LocalDate date = LocalDate.parse(prompt(s));
+//            return date;
+//        } catch (DateTimeParseException e) {
+//            println("Please try again.");
+//        }
+//    }
+//}
 
 // Beginning Page format
-void beginningPage(boolean goingToEnter, String start, String end){
+void beginningPage(boolean getStartDate, boolean getEndDate, boolean getErrorDate, boolean goingToStart, String start, String end){
    
    background(50);
    rectMode(CORNERS);
@@ -47,27 +47,29 @@ void beginningPage(boolean goingToEnter, String start, String end){
    
    color startBoxColor, endBoxColor;
    color startDateColor, endDateColor;
-   if ( !goingToEnter ){
-     startBoxColor = color(255, 95);
-     endBoxColor = color(255, 95);
-     startDateColor = color(0);
-     endDateColor = color(0);
-     fill(255);
-     rect(900, 620, 1060, 652, 2.5, 2.5, 2.5, 2.5);
-     fill(0);
-     textAlign(CENTER, CENTER);
-     text("Enter", 980, 633);
-     
+   color[] confirm = { color(255, 30), color(255) };
+   color[] unConfirm = { color(255, 95), color(0) };
+   if ( !getStartDate ){
+     startBoxColor = unConfirm[0];
+     endBoxColor = unConfirm[0];
+     startDateColor = unConfirm[1];
+     endDateColor = unConfirm[1];
+     if ( !start.equals("") ){
+       fill(200);
+       text("Press ENTER to confirm", 1065, 525);
+     }
+   } else if ( getStartDate && !getEndDate ){
+     startBoxColor = confirm[0];
+     endBoxColor = unConfirm[0];
+     startDateColor = confirm[1];
+     endDateColor = unConfirm[1];
+     fill(200);
+     text("Press ENTER to confirm", 1065, 575);
    } else {
-     startBoxColor = color(255, 30);
-     endBoxColor = color(255, 30);
-     startDateColor = color(255);
-     endDateColor = color(255);
-     fill(255);
-     rect(900, 620, 1060, 652, 2.5, 2.5, 2.5, 2.5);
-     fill(0);
-     textAlign(CENTER, CENTER);
-     text("Start", 980, 633);
+     startBoxColor = confirm[0];
+     endBoxColor = confirm[0];
+     startDateColor = confirm[1];
+     endDateColor = confirm[1];
    }
    
    noStroke();
@@ -75,12 +77,60 @@ void beginningPage(boolean goingToEnter, String start, String end){
    rect(900, 510, 1050, 545);
    fill(endBoxColor);
    rect(900, 560, 1050, 595);
-   textAlign(LEFT, CENTER);
    fill(startDateColor);
    text(start, 925, 525);
    fill(endDateColor);
    text(end, 925, 575);
+   
+    if ( getErrorDate ){
+        fill(#EDAFAF);
+        //text("ERROR, please re-enter", 850, 625);
+        textAlign(CENTER, CENTER);
+        text("ERROR. Please Re-Enter", 980, 680);
+    }
 
+    if ( !goingToStart ){
+
+        stroke(255);
+        textAlign(CENTER, CENTER);
+        if (getStartDate && getEndDate){
+            if( mouseX > 990 && mouseY > 620 && mouseX < 1066 && mouseY < 652){
+                fill(255);
+                rect(990, 620, 1066, 652, 2.5, 2.5, 2.5, 2.5);
+                fill(0);
+                text("Start", 1028, 633);
+            } else {
+                noFill();
+                rect(990, 620, 1066, 652, 2.5, 2.5, 2.5, 2.5);
+                fill(255);
+                text("Start", 1028, 633);
+            }
+            if ( mouseX > 890 && mouseY > 620 && mouseX < 966 && mouseY < 652){
+                fill(255);
+                rect(890, 620, 966, 652, 2.5, 2.5, 2.5, 2.5);
+                fill(0);
+                text("Reset", 928, 633);
+            } else {
+                noFill();
+                rect(890, 620, 966, 652, 2.5, 2.5, 2.5, 2.5);
+                fill(255);
+                text("Reset", 928, 633);
+            }
+        } else {
+            if ( mouseX > 900 && mouseY > 620 && mouseX < 1060 && mouseY < 652){
+                fill(255);
+                rect(900, 620, 1060, 652, 2.5, 2.5, 2.5, 2.5);
+                fill(0);
+                text("Reset", 980, 633);
+            } else {
+                noFill();
+                rect(900, 620, 1060, 652, 2.5, 2.5, 2.5, 2.5);
+                fill(255);
+                text("Reset", 980, 633);
+            } 
+        }
+        noStroke(); // back to no stroke
+    }
 }
 
 
